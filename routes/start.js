@@ -1,7 +1,7 @@
 const path = require("path");
 const express = require("express");
 const server = express();
-const start = require("../service/Haushaltbuch");
+const start = require("../service/haushaltbuch");
 
 //start
 server.get("/", (req, res) => {
@@ -9,11 +9,7 @@ server.get("/", (req, res) => {
 });
 
 server.get("/start1", (req, res) => {
-  getHaushaltsbuchAll(req, res);
-});
-
-async function getHaushaltsbuchAll(req, res) {
   start.getHaushaltsbuchAll(req, res);
-}
+});
 
 module.exports = server;
