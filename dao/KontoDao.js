@@ -13,7 +13,7 @@ class KontoDao {
   loadById(id) {
     const haushaltsbuch = new Haushaltsbuch(this._conn);
 
-    var sql = "SELECT * FROM Einnahmen WHERE ID=?";
+    var sql = "SELECT * FROM Konto WHERE ID=?";
     var statement = this._conn.prepare(sql);
     var result = statement.get(id);
 
@@ -30,14 +30,17 @@ class KontoDao {
   loadByHaushaltsbuchId(id) {
     const haushaltsbuch = new Haushaltsbuch(this._conn);
 
-    var sql = "SELECT * FROM Einnahmen WHERE HaushaltsbuchId=?";
+    var sql = "SELECT * FROM Konto WHERE Haushaltsbuchid=?";
     var statement = this._conn.prepare(sql);
-    var result = statement.get(id);
+    var result = statement.all(id);
+    console.log(result);
 
     if (helper.isUndefined(result))
       throw new Error("No Record found by id=" + id);
 
-    result = helper.objectKeysToLower(result);
+    if (helper.isArrayEmpty(result)) return [];
+
+    result = helper.arrayObjectKeysToLower(result);
 
     for (var i = 0; i < result.length; i++) {
       result[i].haushaltsbuch = haushaltsbuch.loadById(
