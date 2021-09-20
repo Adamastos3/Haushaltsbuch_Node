@@ -2,14 +2,25 @@ function getRequest(path, func, info = undefined) {
   let request = new XMLHttpRequest();
   request.open("GET", path);
   request.onload = function () {
-    let data = JSON.parse(request.responseText);
-    console.log(data);
+    try {
+      let data = JSON.parse(request.responseText);
+      console.log(data);
+      console.log("Test");
 
-    if (data.daten != null) {
-      if (info == undefined) {
+      if (!data.fehler) {
         func(data.daten);
       } else {
-        func(data.daten, info);
+        if (info == undefined) {
+          location.href = "/fehler";
+        } else {
+          location.href = "/fehler/" + info;
+        }
+      }
+    } catch {
+      if (info == undefined) {
+        location.href = "/fehler";
+      } else {
+        location.href = "/fehler/" + info;
       }
     }
   };
