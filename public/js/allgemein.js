@@ -1,7 +1,7 @@
 //init seesionstorage
 function initStorage() {
   if (sessionStorage.length === 0) {
-    sessionStorage.setItem("regular", "");
+    sessionStorage.setItem("buch", "");
   }
 }
 
