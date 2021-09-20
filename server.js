@@ -44,7 +44,10 @@ server.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 //Routen
 var route = require("./routes/start.js");
 server.use("/", route);
-
+route = require("./routes/konto.js");
+server.use("/", route);
+route = require("./routes/fehler.js");
+server.use("/", route);
 //startet server
 server.listen(port, () => {
   console.log("Server listen to Port " + port);
