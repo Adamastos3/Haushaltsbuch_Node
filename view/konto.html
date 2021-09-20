@@ -61,9 +61,21 @@
     </div>
 
     <div class="container center_div">
-      <div class="mb-3" id="checks"></div>
-      <button type="button" class="btn btn-primary" onclick="changeSite()">
-        Submit
+      <div class="mb-3" id="checks">
+        <table class="table" id="kontotable">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Bezeichnung</th>
+              <th scope="col">Beschreibung</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="addKonto()">
+        Konto hinzufügen
       </button>
     </div>
     <footer class="fixed-bottom bg-light text-center text-lg-start">
