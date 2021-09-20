@@ -1,0 +1,30 @@
+{
+  "name": "haushaltsbuch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "devStart": "nodemon server.js",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adamastos3",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.4.3",
+    "body-parser": "^1.19.0",
+    "bootstrap": "^5.1.1",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "luxon": "^2.0.2",
+    "md5": "^2.3.0",
+    "serve-favicon": "^2.5.0",
+    "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.2"
+  }
+}
