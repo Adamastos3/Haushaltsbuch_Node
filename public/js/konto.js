@@ -1,5 +1,5 @@
-const pathKonto =
-  "http://localhost:3000/konto/" + sessionStorage.getItem("buch");
+const pathKonto = "http://localhost:3000/konto/haushaltsbuch/";
+
 let table = document.getElementById("tableBody");
 
 function setKonto(data) {
@@ -19,7 +19,10 @@ function setKonto(data) {
       "</td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delKonto(" +
       data[i].id +
-      ")'> Konto entfernen </button> ";
+      ")'> Konto entfernen </button> </td> " +
+      "<td> <button type='button' class='btn btn-primary' onclick='updateKonto(" +
+      data[i].id +
+      ")'> Konto bearbeiten </button> </td> ";
 
     let rw = table.insertRow(0);
     rw.innerHTML += row;
@@ -28,8 +31,22 @@ function setKonto(data) {
   }
 }
 
-function addKonto() {}
+function addKonto() {
+  location.href = "/neueskonto";
+}
 
-function delKonto() {}
+function delKonto(id) {
+  let path = pathKonto + id;
+  postRequest(path, resetSite);
+}
 
-getRequest(pathKonto, setKonto);
+function updateKonto(id) {
+  sessionStorage.setItem("Konto", id);
+  location.href = "/updatekonto";
+}
+
+function resetSite(data) {
+  location.reload();
+}
+
+getRequest(pathKonto + sessionStorage.getItem("buch"), setKonto);
