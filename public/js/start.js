@@ -22,6 +22,7 @@ function setHaushaltsbuch(data) {
       "</label>" +
       "</div>";
   }
+  sessionStorage.clear();
 }
 
 function controll(data) {
