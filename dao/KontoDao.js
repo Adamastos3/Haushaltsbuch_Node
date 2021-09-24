@@ -22,7 +22,7 @@ class KontoDao {
 
     result = helper.objectKeysToLower(result);
 
-    result.Haushaltsbuch = haushaltsbuch.loadById(result.haushaltsbuchid);
+    result.haushaltsbuch = haushaltsbuch.loadById(result.haushaltsbuchid);
 
     return result;
   }
