@@ -63,37 +63,31 @@
     <div class="container center_div">
       <form class="align-items-center" id="form">
         <div class="mb-3" id="checks">
-          <form id="form">
-            <div class="form-group">
-              <label for="Bezeichnung">Bezeichnung</label>
-              <input
-                type="text"
-                class="form-control"
-                id="Bezeichnung"
-                aria-describedby="emailHelp"
-                placeholder="Bezeichnung"
-              />
-              <small id="emailHelp" class="form-text text-muted"
-                >Die Beschreibung sollte nicht vielsagend sein.</small
-              >
-            </div>
-            <div class="form-group">
-              <label for="Beschreibung">Beschreibung</label>
-              <input
-                type="text"
-                class="form-control"
-                id="Beschreibung"
-                placeholder="Beschreibung"
-              />
-            </div>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              onclick="submitKonto()"
+          <div class="form-group">
+            <label for="Bezeichnung">Bezeichnung</label>
+            <input
+              type="text"
+              class="form-control"
+              id="Bezeichnung"
+              aria-describedby="emailHelp"
+              placeholder="Bezeichnung"
+            />
+            <small id="emailHelp" class="form-text text-muted"
+              >Die Beschreibung sollte nicht vielsagend sein.</small
             >
-              Submit
-            </button>
-          </form>
+          </div>
+          <div class="form-group">
+            <label for="Beschreibung">Beschreibung</label>
+            <input
+              type="text"
+              class="form-control"
+              id="Beschreibung"
+              placeholder="Beschreibung"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary" onclick="submitKonto()">
+            Submit
+          </button>
         </div>
       </form>
     </div>

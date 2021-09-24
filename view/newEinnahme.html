@@ -22,8 +22,8 @@
     ></script>
     <script src="./js/allgemein.js" defer></script>
     <script src="./js/request.js" defer></script>
-    <script src="./js/updateKategorie.js" defer></script>
-    <title>Konto</title>
+    <script src="./js/newEinnahmen.js" defer></script>
+    <title>Einnahmen</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -57,7 +57,7 @@
     </nav>
 
     <div class="container center_div">
-      <p class="h2">Update Konto</p>
+      <p class="h2">Erstellen einer neuen Einnahme</p>
     </div>
 
     <div class="container center_div">
@@ -70,6 +70,7 @@
               class="form-control"
               id="Bezeichnung"
               aria-describedby="emailHelp"
+              placeholder="Bezeichnung"
             />
             <small id="emailHelp" class="form-text text-muted"
               >Die Beschreibung sollte nicht vielsagend sein.</small
@@ -77,10 +78,30 @@
           </div>
           <div class="form-group">
             <label for="Beschreibung">Beschreibung</label>
-            <input type="text" class="form-control" id="Beschreibung" />
+            <input
+              type="text"
+              class="form-control"
+              id="Beschreibung"
+              placeholder="Beschreibung"
+            />
           </div>
-          <button type="submit" class="btn btn-primary" onclick="submitKonto()">
-            Verändern
+          <div class="form-group">
+            <label for="Betrag">Betrag</label>
+            <input type="number" class="form-control" id="Betrag" />
+          </div>
+          <div class="form-group" id="Kategorie"></div>
+          <div class="form-group" id="Konto"></div>
+          <div class="form-group">
+            <label for="Datum">Datum</label>
+            <input type="date" class="form-control" id="Datum" />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            onclick="submitEinnahme()"
+          >
+            Submit
           </button>
         </div>
       </form>

@@ -22,8 +22,8 @@
     ></script>
     <script src="./js/allgemein.js" defer></script>
     <script src="./js/request.js" defer></script>
-    <script src="./js/updateKategorie.js" defer></script>
-    <title>Konto</title>
+    <script src="./js/updateKonto.js" defer></script>
+    <title>Kategorie</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -57,7 +57,7 @@
     </nav>
 
     <div class="container center_div">
-      <p class="h2">Update Konto</p>
+      <p class="h2">Update Kategorie</p>
     </div>
 
     <div class="container center_div">
@@ -79,7 +79,11 @@
             <label for="Beschreibung">Beschreibung</label>
             <input type="text" class="form-control" id="Beschreibung" />
           </div>
-          <button type="submit" class="btn btn-primary" onclick="submitKonto()">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            onclick="submitKategorie()"
+          >
             Verändern
           </button>
         </div>

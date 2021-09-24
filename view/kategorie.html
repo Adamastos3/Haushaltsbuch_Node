@@ -22,8 +22,8 @@
     ></script>
     <script src="./js/allgemein.js" defer></script>
     <script src="./js/request.js" defer></script>
-    <script src="./js/updateKategorie.js" defer></script>
-    <title>Konto</title>
+    <script src="./js/kategorie.js" defer></script>
+    <title>Kategorie</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -57,33 +57,27 @@
     </nav>
 
     <div class="container center_div">
-      <p class="h2">Update Konto</p>
+      <p class="h1" id="head">Übersicht Kategorie</p>
     </div>
 
     <div class="container center_div">
-      <form class="align-items-center" id="form">
-        <div class="mb-3" id="checks">
-          <div class="form-group">
-            <label for="Bezeichnung">Bezeichnung</label>
-            <input
-              type="text"
-              class="form-control"
-              id="Bezeichnung"
-              aria-describedby="emailHelp"
-            />
-            <small id="emailHelp" class="form-text text-muted"
-              >Die Beschreibung sollte nicht vielsagend sein.</small
-            >
-          </div>
-          <div class="form-group">
-            <label for="Beschreibung">Beschreibung</label>
-            <input type="text" class="form-control" id="Beschreibung" />
-          </div>
-          <button type="submit" class="btn btn-primary" onclick="submitKonto()">
-            Verändern
-          </button>
-        </div>
-      </form>
+      <div class="mb-3" id="checks2">
+        <table class="table" id="einnahmetable">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Bezeichnung</th>
+              <th scope="col">Beschreibung</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="addKategorie()">
+        Kategorie hinzufügen
+      </button>
     </div>
     <footer class="fixed-bottom bg-light text-center text-lg-start">
       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">

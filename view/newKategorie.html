@@ -22,8 +22,8 @@
     ></script>
     <script src="./js/allgemein.js" defer></script>
     <script src="./js/request.js" defer></script>
-    <script src="./js/updateKategorie.js" defer></script>
-    <title>Konto</title>
+    <script src="./js/newKategorie.js" defer></script>
+    <title>Kategorie</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -57,7 +57,7 @@
     </nav>
 
     <div class="container center_div">
-      <p class="h2">Update Konto</p>
+      <p class="h1" id="head">Erstellen einer neuen Kategorie</p>
     </div>
 
     <div class="container center_div">
@@ -70,6 +70,7 @@
               class="form-control"
               id="Bezeichnung"
               aria-describedby="emailHelp"
+              placeholder="Bezeichnung"
             />
             <small id="emailHelp" class="form-text text-muted"
               >Die Beschreibung sollte nicht vielsagend sein.</small
@@ -77,10 +78,19 @@
           </div>
           <div class="form-group">
             <label for="Beschreibung">Beschreibung</label>
-            <input type="text" class="form-control" id="Beschreibung" />
+            <input
+              type="text"
+              class="form-control"
+              id="Beschreibung"
+              placeholder="Beschreibung"
+            />
           </div>
-          <button type="submit" class="btn btn-primary" onclick="submitKonto()">
-            Verändern
+          <button
+            type="submit"
+            class="btn btn-primary"
+            onclick="submitKategorie()"
+          >
+            Submit
           </button>
         </div>
       </form>
