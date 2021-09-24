@@ -48,6 +48,13 @@ route = require("./routes/konto.js");
 server.use("/", route);
 route = require("./routes/fehler.js");
 server.use("/", route);
+route = require("./routes/einnahmen.js");
+server.use("/", route);
+route = require("./routes/kategorie.js");
+server.use("/", route);
+route = require("./routes/uebersicht.js");
+server.use("/", route);
+
 //startet server
 server.listen(port, () => {
   console.log("Server listen to Port " + port);
