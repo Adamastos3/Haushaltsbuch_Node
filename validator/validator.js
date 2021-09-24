@@ -245,6 +245,20 @@ async function checkBezeichnung(elem) {
   return error;
 }
 
+async function checkBetrag(elem) {
+  let error = [];
+  const b = await validator.isNumeric(elem);
+  const c = await validator.isLength(elem, [{ min: 1, max: 20 }]);
+
+  if (!b && !c) {
+    error.push({
+      bezeichnung: "Betrag muss eine Zahl sein ",
+    });
+  }
+
+  return error;
+}
+
 async function checkAddKonto(req) {
   let error = [];
   let er = [];
@@ -278,6 +292,74 @@ async function checkChangeKonto(req) {
   return error;
 }
 
+async function checkAddKategorie(req) {
+  let error = [];
+  let er = [];
+  er.push(await checkBezeichnung(req.body.bezeichnung));
+  er.push(await checkText(req.body.beschreibung));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
+async function checkChangeKategorie(req) {
+  let error = [];
+  let er = [];
+  er.push(await checkBezeichnung(req.body.bezeichnung));
+  er.push(await checkText(req.body.beschreibung));
+  er.push(await checkID(req.body.id));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
+async function checkAddEinnahme(req) {
+  let error = [];
+  let er = [];
+  er.push(await checkBezeichnung(req.body.bezeichnung));
+  er.push(await checkText(req.body.beschreibung));
+  er.push(await checkID(req.body.kategorieid));
+  er.push(await checkID(req.body.kontoid));
+  er.push(await checkBetrag(req.body.betrag));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
+async function checkChangeEinnahme(req) {
+  let error = [];
+  let er = [];
+  er.push(await checkBezeichnung(req.body.bezeichnung));
+  er.push(await checkText(req.body.beschreibung));
+  er.push(await checkID(req.body.kategorieid));
+  er.push(await checkID(req.body.kontoid));
+  er.push(await checkBetrag(req.body.betrag));
+  er.push(await checkID(req.body.id));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
 module.exports = {
   checkLogin,
   checkMail,
@@ -286,4 +368,8 @@ module.exports = {
   checkID,
   checkAddKonto,
   checkChangeKonto,
+  checkAddKategorie,
+  checkChangeKategorie,
+  checkAddEinnahme,
+  checkChangeEinnahme,
 };
