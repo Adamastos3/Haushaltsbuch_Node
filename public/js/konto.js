@@ -37,7 +37,7 @@ function addKonto() {
 
 function delKonto(id) {
   let path = pathKonto + id;
-  postRequest(path, resetSite);
+  deleteRequest(path, resetSite);
 }
 
 function updateKonto(id) {

@@ -1,4 +1,4 @@
-function getRequest(path, func, info = undefined) {
+function getRequest(path, func, data = undefined, info = undefined) {
   let request = new XMLHttpRequest();
   request.open("GET", path);
   request.onload = function () {
@@ -24,7 +24,12 @@ function getRequest(path, func, info = undefined) {
       }
     }
   };
-  request.send();
+
+  if (data == undefined) {
+    request.send();
+  } else {
+    request.send(data);
+  }
 }
 
 function postRequest(path, data, func = undefined, info = undefined) {
