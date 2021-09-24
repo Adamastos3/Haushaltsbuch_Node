@@ -1,21 +1,21 @@
 const helper = require("../helper.js");
-const KontoDao = require("../dao/KontoDao.js");
+const KategorieDao = require("../dao/KategorieDao.js");
 const db = require("../db/db.js");
 const validator = require("../validator/validator");
 
-function getKontoAll(req, res) {
-  helper.log("Service Konto: Client requested all records");
+function getKategorieAll(req, res) {
+  helper.log("Service Kategorie: Client requested all records");
   let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
+  const kategorie = new KategorieDao(DB);
   try {
-    var result = konto.loadAll();
+    var result = kategorie.loadAll();
     console.log(result);
-    helper.log("Service Konto: Records loaded, count=" + result.length);
+    helper.log("Service Kategorie: Records loaded, count=" + result.length);
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
   } catch (ex) {
     helper.logError(
-      "Service Konto: Error loading all records. Exception occured: " +
+      "Service Kategorie: Error loading all records. Exception occured: " +
         ex.message
     );
     db.closeDatabase(DB);
@@ -23,42 +23,20 @@ function getKontoAll(req, res) {
   }
 }
 
-function getKontoById(req, res) {
-  helper.log("Service Konto: Client requested one record, id=" + req.params.id);
-  let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
-  try {
-    var result = konto.loadById(req.params.id);
-    helper.log("Service Konto: Record loaded");
-    db.closeDatabase(DB);
-    res.status(200).json(helper.jsonMsgOK(result));
-  } catch (ex) {
-    helper.logError(
-      "Service Konto: Error loading record by id. Exception occured: " +
-        ex.message
-    );
-    db.closeDatabase(DB);
-    res.status(400).json(helper.jsonMsgError(ex.message));
-  }
-}
-
-function getKontoByHaushaltsbuchID(req, res) {
+function getKategorieById(req, res) {
   helper.log(
-    "Service Konto: Client requested all records with the budget book id, id=" +
-      req.params.id
+    "Service Kategorie: Client requested one record, id=" + req.params.id
   );
   let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
-  let id = req.params.id;
+  const kategorie = new KategorieDao(DB);
   try {
-    var result = konto.loadByHaushaltsbuchId(id);
-    console.log(result);
-    helper.log("Service Konto: Records loaded, count=" + result.length);
+    var result = kategorie.loadById(req.params.id);
+    helper.log("Service Kategorie: Record loaded");
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
   } catch (ex) {
     helper.logError(
-      "Service Konto: Error loading all records. Exception occured: " +
+      "Service Kategorie: Error loading record by id. Exception occured: " +
         ex.message
     );
     db.closeDatabase(DB);
@@ -66,20 +44,20 @@ function getKontoByHaushaltsbuchID(req, res) {
   }
 }
 
-async function addKonto(req, res) {
-  helper.log("Service Konto: Client requested creation of new record");
+async function addKategorie(req, res) {
+  helper.log("Service Kategorie: Client requested creation of new record");
   let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
+  const kategorie = new KategorieDao(DB);
   var errorMsgs = [];
-  let a = await validator.checkAddKonto(req);
+  let a = await validator.checkAddKategorie(req);
   if (a == []) {
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
-    if (helper.isUndefined(req.body.haushaltsbuchid))
-      errorMsgs.push("Haushaltsbuchid fehlt");
+    if (helper.isUndefined(req.body.beschreibung))
+      errorMsgs.push("beschreibung fehlt");
 
     if (errorMsgs.length > 0) {
-      helper.log("Service Konto: Creation not possible, data missing");
+      helper.log("Service Kategorie: Creation not possible, data missing");
       res
         .status(400)
         .json(
@@ -92,24 +70,23 @@ async function addKonto(req, res) {
       return;
     }
     try {
-      var result = konto.create(
-        req.body.haushaltsbuchid,
+      var result = kategorie.create(
         req.body.bezeichnung,
         req.body.beschreibung
       );
-      helper.log("Service Konto: Record inserted");
+      helper.log("Service Kategorie: Record inserted");
       db.closeDatabase(DB);
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
-        "Service Konto: Error creating new record. Exception occured: " +
+        "Service Kategorie: Error creating new record. Exception occured: " +
           ex.message
       );
       db.closeDatabase(DB);
       res.status(400).json(helper.jsonMsgError(ex.message));
     }
   } else {
-    helper.log("Service Konto: Creation not possible, data missing");
+    helper.log("Service Kategorie: Creation not possible, data missing");
     res
       .status(400)
       .json(
@@ -122,25 +99,22 @@ async function addKonto(req, res) {
   }
 }
 
-async function updateKonto(req, res) {
-  helper.log("Service Konto: Client requested update of existing record");
+async function updateKategorie(req, res) {
+  helper.log("Service Kategorie: Client requested update of existing record");
   let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
+  const kategorie = new KategorieDao(DB);
   var errorMsgs = [];
-  let a = await validator.checkChangeKonto(req);
+  let a = await validator.checkChangeKategorie(req);
   if (a == []) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
     if (helper.isUndefined(req.body.beschreibung)) {
-      errorMsgs.push("bezeichnung fehlt");
-    }
-    if (helper.isUndefined(req.body.haushaltsbuchid)) {
-      errorMsgs.push("haushaltsbuchid fehlt");
+      errorMsgs.push("beschreibung fehlt");
     }
 
     if (errorMsgs.length > 0) {
-      helper.log("Service Konto: Update not possible, data missing");
+      helper.log("Service Kategorie: Update not possible, data missing");
       res
         .status(400)
         .json(
@@ -154,25 +128,24 @@ async function updateKonto(req, res) {
     }
 
     try {
-      var result = konto.update(
+      var result = kategorie.update(
         req.body.id,
-        req.body.haushaltsbuchid,
         req.body.bezeichnung,
         req.body.beschreibung
       );
-      helper.log("Service Konto: Record updated, id=" + req.body.id);
+      helper.log("Service Kategorie: Record updated, id=" + req.body.id);
       db.closeDatabase(DB);
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
-        "Service Konto: Error updating record by id. Exception occured: " +
+        "Service Kategorie: Error updating record by id. Exception occured: " +
           ex.message
       );
       db.closeDatabase(DB);
       res.status(400).json(helper.jsonMsgError(ex.message));
     }
   } else {
-    helper.log("Service Konto: Update not possible, data missing");
+    helper.log("Service Kategorie: Update not possible, data missing");
     res
       .status(400)
       .json(
@@ -185,23 +158,23 @@ async function updateKonto(req, res) {
   }
 }
 
-function deleteKonto(res, req) {
+function deleteKategorie(res, req) {
   helper.log(
-    "Service Konto: Client requested deletion of record, id=" +
+    "Service Kategorie: Client requested deletion of record, id=" +
       request.params.id
   );
   let DB = db.getDatabase();
-  const konto = new KontoDao(DB);
+  const kategorie = new KategorieDao(DB);
   let id = req.params.id;
   try {
-    var result = konto.delete(id);
+    var result = kategorie.delete(id);
     console.log(result);
-    helper.log("Service Konto: Records loaded, count=" + result.length);
+    helper.log("Service Kategorie: Records loaded, count=" + result.length);
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
   } catch (ex) {
     helper.logError(
-      "Service Konto: Error loading all records. Exception occured: " +
+      "Service Kategorie: Error loading all records. Exception occured: " +
         ex.message
     );
     db.closeDatabase(DB);
@@ -210,10 +183,9 @@ function deleteKonto(res, req) {
 }
 
 module.exports = {
-  getKontoAll,
-  getKontoById,
-  getKontoByHaushaltsbuchID,
-  deleteKonto,
-  addKonto,
-  updateKonto,
+  getKategorieAll,
+  getKategorieById,
+  deleteKategorie,
+  addKategorie,
+  updateKategorie,
 };
