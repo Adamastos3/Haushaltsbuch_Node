@@ -131,8 +131,7 @@ async function addEinnahmen(req, res) {
         req.body.bezeichnung,
         req.body.beschreibung,
         req.body.betrag,
-        req,
-        body.datum
+        req.body.datum
       );
       helper.log("Service Einnahmen: Record inserted");
       db.closeDatabase(DB);
@@ -205,8 +204,7 @@ async function updateEinnahmen(req, res) {
         req.body.bezeichnung,
         req.body.beschreibung,
         req.body.betrag,
-        req,
-        body.datum
+        req.body.datum
       );
       helper.log("Service Einnahmen: Record updated, id=" + req.body.id);
       db.closeDatabase(DB);
