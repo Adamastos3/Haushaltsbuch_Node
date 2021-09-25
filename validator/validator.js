@@ -360,6 +360,14 @@ async function checkChangeEinnahme(req) {
   return error;
 }
 
+async function checkChangeAusgabe(req) {
+  return checkChangeEinnahme(req);
+}
+
+async function checkAddAusgaben(req) {
+  return checkAddEinnahme(req);
+}
+
 module.exports = {
   checkLogin,
   checkMail,
@@ -372,4 +380,6 @@ module.exports = {
   checkChangeKategorie,
   checkAddEinnahme,
   checkChangeEinnahme,
+  checkAddAusgaben,
+  checkChangeAusgabe,
 };
