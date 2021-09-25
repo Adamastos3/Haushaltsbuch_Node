@@ -46,4 +46,10 @@ function setDateToGerman(date) {
   return "" + str[2] + "." + str[1] + "." + str[0];
 }
 
+function setDatum(id) {
+  let datum = document.getElementById(id);
+  datum.value = "";
+  datum.setAttribute("type", "date");
+}
+
 initStorage();
