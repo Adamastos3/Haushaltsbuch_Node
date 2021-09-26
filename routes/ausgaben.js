@@ -24,6 +24,10 @@ server.get("/ausgaben/sort", (req, res) => {
   ausgaben.getAusgabenBySort(req, res);
 });
 
+server.get("/ausgaben/alles/:id", (req, res) => {
+  ausgaben.getAusgabenAll(req, res);
+});
+
 server.get("/ausgaben/:id", (req, res) => {
   ausgaben.getAusgabenById(req, res);
 });

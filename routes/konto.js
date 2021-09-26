@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const server = express();
 const konto = require("../service/konto");
+const kontostand = require("../service/kontostand");
 
 //Konto
 server.get("/konto", (req, res) => {
@@ -18,6 +19,12 @@ server.get("/updatekonto", (req, res) => {
   });
 });
 
+server.get("/updatekontostand", (req, res) => {
+  res.sendFile("updateKontostand.html", {
+    root: path.join(__dirname, "..", "view"),
+  });
+});
+
 server.get("/konto/haushaltsbuch/:id", (req, res) => {
   konto.getKontoByHaushaltsbuchID(req, res);
 });
@@ -28,6 +35,10 @@ server.get("/konto/:id", (req, res) => {
 
 server.post("/konto", (req, res) => {
   konto.addKonto(req, res);
+});
+
+server.post("/kontostand", (req, res) => {
+  kontostand.addKontostand(req, res);
 });
 
 server.put("/konto", (req, res) => {

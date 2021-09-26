@@ -23,6 +23,9 @@ server.get("/updateEinnahme", (req, res) => {
 server.get("/einnahmen/sort", (req, res) => {
   einnahmen.getEinnahmenBySort(req, res);
 });
+server.get("/einnahmen/alles/:id", (req, res) => {
+  einnahmen.getEinnahmenAll(req, res);
+});
 
 server.get("/einnahmen/:id", (req, res) => {
   einnahmen.getEinnahmenById(req, res);
