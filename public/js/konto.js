@@ -17,6 +17,12 @@ function setKonto(data) {
       "<td> " +
       data[i].beschreibung +
       "</td> " +
+      "<td> " +
+      data[i].kontostand.betrag +
+      "</td> " +
+      "<td> <button type='button' class='btn btn-primary' onclick='addKontostand(" +
+      data[i].id +
+      ")'> Konto bearbeiten </button> </td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delKonto(" +
       data[i].id +
       ")'> Konto entfernen </button> </td> " +
@@ -29,6 +35,11 @@ function setKonto(data) {
     console.log(rw);
     row = "";
   }
+}
+
+function addKontostand(id) {
+  sessionStorage.setItem("kontostand", id);
+  location.href = "/updateKontostand";
 }
 
 function addKonto() {

@@ -21,7 +21,7 @@ function setAusgaben(data) {
       data[i].betrag +
       "</td> " +
       "<td> " +
-      data[i].kategorie +
+      data[i].kategorie.bezeichnung +
       "</td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delAusgaben(" +
       data[i].id +
