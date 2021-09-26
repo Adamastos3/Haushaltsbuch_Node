@@ -1,14 +1,20 @@
 const helper = require("../helper.js");
 const KontoDao = require("../dao/KontoDao.js");
+const Kontostand = require("../dao/KontostandDao");
 const db = require("../db/db.js");
 const validator = require("../validator/validator");
+const KontostandDao = require("../dao/KontostandDao");
 
 function getKontoAll(req, res) {
   helper.log("Service Konto: Client requested all records");
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const kontostand = new KontostandDao(DB);
   try {
     var result = konto.loadAll();
+    for (let i = 0; i < result.length; i++) {
+      result.kontostand = kontostand.getMaxId(result[i].id);
+    }
     console.log(result);
     helper.log("Service Konto: Records loaded, count=" + result.length);
     db.closeDatabase(DB);
@@ -27,8 +33,10 @@ function getKontoById(req, res) {
   helper.log("Service Konto: Client requested one record, id=" + req.params.id);
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const kontostand = new KontostandDao(DB);
   try {
     var result = konto.loadById(req.params.id);
+    result.kontostand = kontostand.getMaxId(result.id);
     helper.log("Service Konto: Record loaded");
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
@@ -49,10 +57,16 @@ function getKontoByHaushaltsbuchID(req, res) {
   );
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const kontostand = new KontostandDao(DB);
   let id = req.params.id;
   try {
-    var result = konto.loadByHaushaltsbuchId(id);
+    let result = [];
+    var resultKonto = konto.loadByHaushaltsbuchId(id);
     console.log(result);
+    for (let i = 0; i < resultKonto.length; i++) {
+      resultKonto[i].kontostand = kontostand.getMaxId(resultKonto[i].id);
+      result.push(resultKonto[i]);
+    }
     helper.log("Service Konto: Records loaded, count=" + result.length);
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));

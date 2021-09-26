@@ -1,12 +1,14 @@
 const helper = require("../helper.js");
-const AusgabenDao = require("../dao/AusgabenDao.js");
+const AusgabenDao = require("../dao/AusgabeDao.js");
 const db = require("../db/db.js");
+const allgemein = require("./allgemein");
 const validator = require("../validator/validator");
 
 function getAusgabenAll(req, res) {
   helper.log("Service Ausgaben: Client requested all records");
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
+  let id = req.params.id;
   try {
     let result = [];
     let alt = ausgaben.loadAll();
@@ -56,28 +58,30 @@ function getAusgabenById(req, res) {
 function getAusgabenBySort(req, res) {
   helper.log(
     "Service Ausgaben: Client requested all records which match the input, sort=" +
-      req.params.sort +
+      req.body.sort +
       " datum=" +
-      req.params.datum
+      req.body.datum
   );
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
-  let id = req.params.id;
-  let sort = getSort(req.params.sort);
-  let datum = getDatum(req.params.datum);
+  let id = req.body.id;
+  let sort = allgemein.getSortEinAus(req.body.sort);
+  let datum = allgemein.getDatum(req.body.datum);
 
   try {
     let result = [];
-    let alt = ausgaben.loadbySort(datum[0], datum[1], sort);
+    let resultKonto = konto.loadByHaushaltsbuchId(id);
     for (let i = 0; i < alt.length; i++) {
-      let a = alt[i].konto.haushaltsbuchid;
-      if (a == id) {
-        result.push(alt[i]);
+      let resultAusgaben = ausgaben.loadbyKontoid(resultKonto[i].id);
+      for (let j = 0; j < resultAusgaben.length; j++) {
+        result.push(resultAusgaben[j]);
       }
     }
+    result = allgemein.sortData(result, datum[0], datum[1], sort);
     console.log(result);
     helper.log("Service Ausgaben: Records loaded, count=" + result.length);
     db.closeDatabase(DB);
+
     res.status(200).json(helper.jsonMsgOK(result));
   } catch (ex) {
     helper.logError(
@@ -89,6 +93,27 @@ function getAusgabenBySort(req, res) {
   }
 }
 
+function addKontostand(data) {
+  let DB = db.getDatabase();
+  const kontostand = new KontostandDao(DB);
+
+  let kontoid = data.kontoid;
+  let lastId = kontostand.getMaxId(kontoid);
+  let Kontostand = lastId.betrag - data.betrag;
+  let bezeichnung = "Kontostand " + data.datum;
+  let beschreibung = "Kontostand nach der Ausgabe " + data.id;
+
+  let result = kontostand.create(
+    kontoid,
+    bezeichnung,
+    beschreibung,
+    Kontostand,
+    data.datum
+  );
+
+  console.log(result);
+}
+
 async function addAusgaben(req, res) {
   helper.log("Service Ausgaben: Client requested creation of new record");
   let DB = db.getDatabase();
@@ -98,6 +123,8 @@ async function addAusgaben(req, res) {
   if (a == []) {
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
+    if (helper.isUndefined(req.body.beschreibung))
+      errorMsgs.push("beschreibung fehlt");
     if (helper.isUndefined(req.body.kategorieid))
       errorMsgs.push("kategorieid fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
@@ -106,7 +133,7 @@ async function addAusgaben(req, res) {
       request.body.datum = helper.getNow();
     } else if (!helper.isGermanDateTimeFormat(request.body.datum)) {
       errorMsgs.push(
-        "Lieferzeitpunkt hat das falsche Format, erlaubt: dd.mm.jjjj hh.mm.ss"
+        "Datum hat das falsche Format, erlaubt: dd.mm.jjjj hh.mm.ss"
       );
     } else {
       request.body.datum = helper.parseGermanDateTimeString(request.body.datum);
@@ -136,6 +163,7 @@ async function addAusgaben(req, res) {
       );
       helper.log("Service Ausgaben: Record inserted");
       db.closeDatabase(DB);
+      addKontostand(result);
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
@@ -169,6 +197,8 @@ async function updateAusgaben(req, res) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
+    if (helper.isUndefined(req.body.beschreibung))
+      errorMsgs.push("beschreibung fehlt");
     if (helper.isUndefined(req.body.kategorieid))
       errorMsgs.push("kategorieid fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
@@ -209,6 +239,7 @@ async function updateAusgaben(req, res) {
       );
       helper.log("Service Ausgaben: Record updated, id=" + req.body.id);
       db.closeDatabase(DB);
+      addKontostand(result);
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
@@ -253,116 +284,6 @@ function deleteAusgaben(res, req) {
     );
     db.closeDatabase(DB);
     res.status(400).json(helper.jsonMsgError(ex.message));
-  }
-}
-
-function getDatum(datum) {
-  let result = [];
-  let datum1 = "";
-  let datum2 = "";
-  if (datum == "Jahr") {
-    let year = helper.getNow().year();
-    let datum1 = "01.01." + year;
-    let datum2 = "31.12." + year;
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum1))
-    );
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum2))
-    );
-    return datum;
-  } else if (datum == "Woche") {
-    let now = helper.getNow().weekday();
-
-    if (now == 1) {
-      datum1 = helper.getNow();
-      datum2 = helper.getNow().plus({ days: 6 });
-    } else if (now == 2) {
-      datum1 = helper.getNow().minus({ days: 1 });
-      datum2 = helper.getNow().plus({ days: 5 });
-    } else if (now == 3) {
-      datum1 = helper.getNow().minus({ days: 2 });
-      datum2 = helper.getNow().plus({ days: 4 });
-    } else if (now == 4) {
-      datum1 = helper.getNow().minus({ days: 3 });
-      datum2 = helper.getNow().plus({ days: 3 });
-    } else if (now == 5) {
-      datum1 = helper.getNow().minus({ days: 4 });
-      datum2 = helper.getNow().plus({ days: 2 });
-    } else if (now == 6) {
-      datum1 = helper.getNow().minus({ days: 5 });
-      datum2 = helper.getNow().plus({ days: 1 });
-    } else if (now == 7) {
-      datum1 = helper.getNow().minus({ days: 6 });
-      datum2 = helper.getNow();
-    }
-    result.push(helper.formatToSQLDateTime(datum1));
-    result.push(helper.formatToSQLDateTime(datum2));
-  } else if (datum == "Monat") {
-    let year = helper.getNow().year();
-    let month = helper.getNow().month();
-
-    if (
-      month == 1 ||
-      month == 3 ||
-      month == 5 ||
-      month == 7 ||
-      month == 8 ||
-      month == 10 ||
-      month == 12
-    ) {
-      if (month < 10) {
-        datum1 = "01.0" + month + "." + year;
-        datum2 = "31.0" + month + "." + year;
-      } else {
-        datum1 = "01." + month + "." + year;
-        datum2 = "31." + month + "." + year;
-      }
-    } else if (month == 2) {
-      datum1 = "01.0" + month + "." + year;
-      datum2 = "28.0" + month + "." + year;
-    } else {
-      if (month < 10) {
-        datum1 = "01.0" + month + "." + year;
-        datum2 = "30.0" + month + "." + year;
-      } else {
-        datum1 = "01." + month + "." + year;
-        datum2 = "30." + month + "." + year;
-      }
-    }
-
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum1))
-    );
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum2))
-    );
-  } else if (datum == "Tag") {
-    datum1 = helper.getNow();
-    datum2 = helper.getNow();
-    result.push(helper.formatToSQLDateTime(datum1));
-    result.push(helper.formatToSQLDateTime(datum2));
-  } else {
-    let year = helper.getNow().year();
-    let datum1 = "01.01." + year;
-    let datum2 = "31.12." + year;
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum1))
-    );
-    result.push(
-      helper.formatToSQLDateTime(helper.parseGermanDateTimeString(datum2))
-    );
-  }
-  return result;
-}
-
-function getSort(sort) {
-  if (sort == "Kategorie") {
-    return "Kategorieid";
-  } else if (sort == "Datum") {
-    return "Datum";
-  } else {
-    return "Datum";
   }
 }
 
