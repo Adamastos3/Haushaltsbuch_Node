@@ -368,6 +368,38 @@ async function checkAddAusgaben(req) {
   return checkAddEinnahme(req);
 }
 
+async function checkAddKontostand(req) {
+  let er = [];
+  er.push(await checkText(req.body.beschreibung));
+  er.push(await checkID(req.body.kontoid));
+  er.push(await checkBetrag(req.body.betrag));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
+async function checkChangeKontostand(req) {
+  let error = [];
+  let er = [];
+  er.push(await checkBezeichnung(req.body.bezeichnung));
+  er.push(await checkID(req.body.kontoid));
+  er.push(await checkBetrag(req.body.betrag));
+  er.push(await checkID(req.body.id));
+
+  for (let i = 0; i < er.length; i++) {
+    if (er[i].length == 1) {
+      error.push(er[i]);
+    }
+  }
+
+  return error;
+}
+
 module.exports = {
   checkLogin,
   checkMail,
@@ -382,4 +414,6 @@ module.exports = {
   checkChangeEinnahme,
   checkAddAusgaben,
   checkChangeAusgabe,
+  checkAddKontostand,
+  checkChangeKontostand,
 };
