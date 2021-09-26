@@ -50,6 +50,8 @@ route = require("./routes/fehler.js");
 server.use("/", route);
 route = require("./routes/einnahmen.js");
 server.use("/", route);
+route = require("./routes/ausgaben.js");
+server.use("/", route);
 route = require("./routes/kategorie.js");
 server.use("/", route);
 route = require("./routes/uebersicht.js");
