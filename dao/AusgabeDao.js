@@ -23,6 +23,9 @@ class AusgabenDao {
       throw new Error("No Record found by id=" + id);
 
     result = helper.objectKeysToLower(result);
+    result.datum = helper.formatToGermanDate(
+      helper.parseSQLDateTimeString(result.datum)
+    );
     result.kategorie = kategorie.loadById(result.kategorieid);
     result.konto = konto.loadById(result.kontoid);
 
@@ -41,6 +44,9 @@ class AusgabenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
@@ -58,11 +64,11 @@ class AusgabenDao {
     return false;
   }
 
-  loadByDate(date1, date2) {
+  loadByKontoid(id) {
     const kategorie = new Kategorie(this._conn);
     const konto = new Konto(this._conn);
-    var sql = "SELECT * FROM Ausgaben WHERE Datum BETWEEN ? AND ?";
-    var params = [date1, date2];
+    var sql = "SELECT * FROM Ausgaben WHERE Kontoid=?";
+    var params = [id];
     var statement = this._conn.prepare(sql);
     var result = statement.all(params);
 
@@ -71,6 +77,9 @@ class AusgabenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
@@ -91,6 +100,9 @@ class AusgabenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
@@ -98,22 +110,12 @@ class AusgabenDao {
     return result;
   }
 
-  loadbySort(datum1, datum2, sort) {
-    const kategorie = new Kategorie(this._conn);
-    const konto = new Konto(this._conn);
-    var sql = "SELECT * FROM Ausgaben WHERE Datum BETWEEN ? AND ? Order BY ?";
-    var params = [datum1, datum2, sort];
+  getMaxId(kontoid) {
+    var sql = "SELECT MAX(ID) FROM Ausgaben WHERE Kontoid=?";
     var statement = this._conn.prepare(sql);
-    var result = statement.all(params);
+    var id = statement.get(kontoid);
 
-    if (helper.isArrayEmpty(result)) return [];
-
-    result = helper.arrayObjectKeysToLower(result);
-
-    for (let i = 0; i < result.lenght; i++) {
-      result[i].kategorie = kategorie.loadById(result[i].kategorieid);
-      result[i].konto = konto.loadById(result[i].kontoid);
-    }
+    let result = this.loadById(id);
 
     return result;
   }

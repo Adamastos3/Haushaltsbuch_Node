@@ -23,6 +23,9 @@ class EinnahmenDao {
       throw new Error("No Record found by id=" + id);
 
     result = helper.objectKeysToLower(result);
+    result.datum = helper.formatToGermanDate(
+      helper.parseSQLDateTimeString(result.datum)
+    );
     result.kategorie = kategorie.loadById(result.kategorieid);
     result.konto = konto.loadById(result.kontoid);
 
@@ -41,6 +44,9 @@ class EinnahmenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
@@ -58,27 +64,6 @@ class EinnahmenDao {
     return false;
   }
 
-  loadByDate(date1, date2) {
-    const kategorie = new Kategorie(this._conn);
-    const konto = new Konto(this._conn);
-    var sql = "SELECT * FROM Einnahmen WHERE Datum BETWEEN ? AND ?";
-    var params = [date1, date2];
-    var statement = this._conn.prepare(sql);
-    var alt = statement.all(params);
-    let result = [];
-
-    if (helper.isArrayEmpty(result)) return [];
-
-    result = helper.arrayObjectKeysToLower(result);
-
-    for (let i = 0; i < result.lenght; i++) {
-      result[i].kategorie = kategorie.loadById(result[i].kategorieid);
-      result[i].konto = konto.loadById(result[i].kontoid);
-    }
-
-    return result;
-  }
-
   loadbyKategorie(id) {
     const kategorie = new Kategorie(this._conn);
     const konto = new Konto(this._conn);
@@ -92,6 +77,9 @@ class EinnahmenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
@@ -99,11 +87,11 @@ class EinnahmenDao {
     return result;
   }
 
-  loadbySort(datum1, datum2, sort) {
+  loadbyKontoid(id) {
     const kategorie = new Kategorie(this._conn);
     const konto = new Konto(this._conn);
-    var sql = "SELECT * FROM Einnahmen WHERE Datum BETWEEN ? AND ? Order BY ?";
-    var params = [datum1, datum2, sort];
+    var sql = "SELECT * FROM Einnahmen WHERE Kontoid=?";
+    var params = [id];
     var statement = this._conn.prepare(sql);
     var result = statement.all(params);
 
@@ -112,9 +100,22 @@ class EinnahmenDao {
     result = helper.arrayObjectKeysToLower(result);
 
     for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
       result[i].kategorie = kategorie.loadById(result[i].kategorieid);
       result[i].konto = konto.loadById(result[i].kontoid);
     }
+
+    return result;
+  }
+
+  getMaxId(kontoid) {
+    var sql = "SELECT MAX(ID) FROM Einnahmen WHERE Kontoid=?";
+    var statement = this._conn.prepare(sql);
+    var id = statement.get(kontoid);
+
+    let result = this.loadById(id);
 
     return result;
   }
