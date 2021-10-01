@@ -17,8 +17,9 @@ class HaushaltsbuchDao {
     if (helper.isUndefined(result))
       throw new Error("No Record found by id=" + id);
 
+    console.log(result);
     result = helper.objectKeysToLower(result);
-
+    console.log("end haushaltsbuch");
     return result;
   }
 
@@ -44,10 +45,11 @@ class HaushaltsbuchDao {
     return false;
   }
 
-  create(name = "", beschreibung = "") {
-    var sql = "INSERT INTO Haushaltsbuch (Name, Beschreibung) VALUES (?,?)";
+  create(bezeichnung = "", beschreibung = "") {
+    var sql =
+      "INSERT INTO Haushaltsbuch (Bezeichnung, Beschreibung) VALUES (?,?)";
     var statement = this._conn.prepare(sql);
-    var params = [name, beschreibung];
+    var params = [bezeichnung, beschreibung];
     var result = statement.run(params);
 
     if (result.changes != 1)
@@ -57,10 +59,11 @@ class HaushaltsbuchDao {
     return newObj;
   }
 
-  update(id, name = "", beschreibung = "") {
-    var sql = "UPDATE Haushaltsbuch SET Name=?,Beschreibung=? WHERE ID=?";
+  update(id, bezeichnung = "", beschreibung = "") {
+    var sql =
+      "UPDATE Haushaltsbuch SET Bezeichnung=?,Beschreibung=? WHERE ID=?";
     var statement = this._conn.prepare(sql);
-    var params = [name, beschreibung, id];
+    var params = [bezeichnung, beschreibung, id];
     var result = statement.run(params);
 
     if (result.changes != 1)
