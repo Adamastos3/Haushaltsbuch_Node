@@ -21,6 +21,9 @@ function setAusgaben(data) {
       data[i].betrag +
       "</td> " +
       "<td> " +
+      data[i].datum +
+      "</td> " +
+      "<td> " +
       data[i].kategorie.bezeichnung +
       "</td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delAusgaben(" +
@@ -44,11 +47,12 @@ function auswahlSortierung() {
     datum: document.getElementById("zeit").value,
   });
 
-  getRequest(pathAusgaben + "sort", setAusgaben, data);
+  postRequest(pathAusgaben + "sort", data, setAusgaben);
 }
 
 function delAusgaben(id) {
   deleteRequest(pathAusgaben + id, druckFehler);
+  location.reload();
 }
 
 function updateAusgaben(id) {
@@ -56,7 +60,7 @@ function updateAusgaben(id) {
   location.href = "/updateAusgabe";
 }
 
-function addAusgabe() {
+function addAusgaben() {
   location.href = "/neueAusgabe";
 }
 
@@ -64,12 +68,4 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
 
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.reload;
-  }
-}
+auswahlSortierung();

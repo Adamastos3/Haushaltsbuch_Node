@@ -1,5 +1,5 @@
 const pathKonto =
-  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.setItem("buch");
+  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.getItem("buch");
 const pathKategorie = "http://localhost:3000/kategorie/all";
 const pathAusgaben = "http://localhost:3000/ausgaben/";
 const form = document.getElementById("form");
@@ -90,16 +90,6 @@ function submitEinnahme() {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
-
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.href = "/ausgaben";
-  }
-}
 
 getRequest(
   pathEinnahmen + sessionStorage.getItem("einnahmen"),

@@ -1,5 +1,5 @@
 const pathKonto =
-  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.setItem("buch");
+  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.getItem("buch");
 const pathKategorie = "http://localhost:3000/kategorie/all";
 const pathEinnahmen = "http://localhost:3000/einnahmen/";
 const form = document.getElementById("form");
@@ -12,7 +12,8 @@ const konto = document.getElementById("Konto");
 function setKategorie(data) {
   let text =
     "<label class='mr-sm-2' for='kategorie'>Kategorie</label>" +
-    "<select class='custom-select mr-sm-2' id='kategorie'> ";
+    "<div class='form-group'> " +
+    "<select class='custom-select form-control mr-sm-2' id='kategorie'> ";
 
   for (let i = 0; i < data.length; i++) {
     if (kategorieid == data.id) {
@@ -31,14 +32,15 @@ function setKategorie(data) {
         "</option> ";
     }
   }
-  text += "</select>";
+  text += "</select> </div>";
   kategorie.innerHTML += text;
 }
 
 function setKonto(data) {
   let text =
     "<label class='mr-sm-2' for='konto'>Konto</label>" +
-    "<select class='custom-select mr-sm-2' id='konto'> ";
+    "<div class='form-group'> " +
+    "<select class='custom-select form-control mr-sm-2' id='konto'> ";
 
   for (let i = 0; i < data.length; i++) {
     if (kontoid == data.id) {
@@ -57,7 +59,7 @@ function setKonto(data) {
         "</option> ";
     }
   }
-  text += "</select>";
+  text += "</select> </div>";
   kategorie.innerHTML += text;
 }
 
@@ -91,17 +93,7 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
 
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.href = "/einnahmen";
-  }
-}
-
 getRequest(
-  pathEinnahmen + sessionStorage.getItem("einnahmen"),
+  pathEinnahmen + sessionStorage.getItem("einnahme"),
   setUpdateEinnahmen
 );

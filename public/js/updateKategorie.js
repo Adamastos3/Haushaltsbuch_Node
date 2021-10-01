@@ -24,14 +24,4 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
 
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.href = "/kategorie";
-  }
-}
-
 getRequest(pathKategorie + id, setKategorie);

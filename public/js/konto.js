@@ -1,4 +1,5 @@
 const pathKonto = "http://localhost:3000/konto/haushaltsbuch/";
+const pathDeleteKonto = "http://localhost:3000/konto/";
 
 let table = document.getElementById("tableBody");
 
@@ -22,7 +23,7 @@ function setKonto(data) {
       "</td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='addKontostand(" +
       data[i].id +
-      ")'> Konto bearbeiten </button> </td> " +
+      ")'> Kontostand angeben </button> </td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delKonto(" +
       data[i].id +
       ")'> Konto entfernen </button> </td> " +
@@ -47,17 +48,14 @@ function addKonto() {
 }
 
 function delKonto(id) {
-  let path = pathKonto + id;
-  deleteRequest(path, resetSite);
+  let path = pathDeleteKonto + id;
+  deleteRequest(path, druckFehler);
+  location.reload();
 }
 
 function updateKonto(id) {
-  sessionStorage.setItem("Konto", id);
+  sessionStorage.setItem("konto", id);
   location.href = "/updatekonto";
-}
-
-function resetSite(data) {
-  location.reload();
 }
 
 getRequest(pathKonto + sessionStorage.getItem("buch"), setKonto);

@@ -3,11 +3,12 @@ const form = document.getElementById("form");
 
 function submitKonto() {
   let daten = JSON.stringify({
-    bezeichnung: document.getElementById("Beschreibung").value,
-    beschreibung: document.getElementById("Bezeichnung").value,
+    bezeichnung: document.getElementById("Bezeichnung").value,
+    beschreibung: document.getElementById("Beschreibung").value,
     haushaltsbuchid: sessionStorage.getItem("buch"),
+    betrag: document.getElementById("Betrag").value,
   });
-
+  console.log(daten);
   postRequest(pathKonto, daten, druckFehler);
 }
 

@@ -5,9 +5,11 @@ const id = sessionStorage.getItem("konto");
 function setKonto(data) {
   let bezeichnung = document.getElementById("Bezeichnung");
   let beschreibung = document.getElementById("Beschreibung");
+  let betrag = document.getElementById("Betrag");
 
   bezeichnung.value = data.bezeichnung;
   beschreibung.value = data.beschreibung;
+  betrag.value = data.kontostand.betrag;
 }
 
 function submitKonto() {
@@ -16,6 +18,7 @@ function submitKonto() {
     bezeichnung: document.getElementById("Beschreibung").value,
     beschreibung: document.getElementById("Bezeichnung").value,
     haushaltsbuchid: sessionStorage.getItem("buch"),
+    betrag: document.getElementById("Betrag").value,
   });
 
   putRequest(pathKonto, daten, druckFehler);
@@ -24,15 +27,5 @@ function submitKonto() {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
-
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.href = "/konto";
-  }
-}
 
 getRequest(pathKonto + id, setKonto);

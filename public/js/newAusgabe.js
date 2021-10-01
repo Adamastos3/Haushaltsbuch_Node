@@ -1,5 +1,5 @@
 const pathKonto =
-  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.setItem("buch");
+  "http://localhost:3000/konto/haushaltsbuch/" + sessionStorage.getItem("buch");
 const pathKategorie = "http://localhost:3000/kategorie/all";
 const pathAusgaben = "http://localhost:3000/ausgaben/";
 const form = document.getElementById("form");
@@ -14,8 +14,9 @@ function start() {
 
 function setKategorie(data) {
   let text =
-    "<label class='mr-sm-2' for='kategorie'>Kategorie</label>" +
-    "<select class='custom-select mr-sm-2' id='kategorie'> ";
+    "<label class='mr-sm-2' for='kategorie'>Kategorie</label> " +
+    "<div class='form-group'> " +
+    "<select class='custom-select form-control mr-sm-2' id='kategorie'> ";
 
   for (let i = 0; i < data.length; i++) {
     if (i == 0) {
@@ -34,14 +35,15 @@ function setKategorie(data) {
         "</option> ";
     }
   }
-  text += "</select>";
+  text += "</select> </div>";
   kategorie.innerHTML += text;
 }
 
 function setKonto(data) {
   let text =
-    "<label class='mr-sm-2' for='konto'>Konto</label>" +
-    "<select class='custom-select mr-sm-2' id='konto'> ";
+    "<label class='mr-sm-2' for='konto'>Konto</label> " +
+    "<div class='form-group'> " +
+    "<select class='custom-select form-control mr-sm-2' id='konto'> ";
 
   for (let i = 0; i < data.length; i++) {
     if (i == 0) {
@@ -60,7 +62,7 @@ function setKonto(data) {
         "</option> ";
     }
   }
-  text += "</select>";
+  text += "</select> </div>";
   kategorie.innerHTML += text;
 }
 
@@ -68,10 +70,10 @@ function submitAusgabe() {
   let data = JSON.stringify({
     bezeichnung: document.getElementById("Bezeichnung").value,
     beschreibung: document.getElementById("Beschreibung").value,
-    betrag: document.getElementById("Betrag"),
-    datum: setDateToGerman(document.getElementById("Datum")),
-    kategorieid: document.getElementById("kategorie"),
-    kontoid: document.getElementById("konto"),
+    betrag: document.getElementById("Betrag").value,
+    datum: setDateToGerman(document.getElementById("Datum").value),
+    kategorieid: document.getElementById("kategorie").value,
+    kontoid: document.getElementById("konto").value,
   });
 
   postRequest(pathAusgaben, data, druckFehler);
@@ -80,15 +82,5 @@ function submitAusgabe() {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
-
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.href = "/usgaben";
-  }
-}
 
 start();

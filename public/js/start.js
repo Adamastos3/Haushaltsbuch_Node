@@ -1,5 +1,6 @@
 const pathStart = "http://localhost:3000/start1";
 const form = document.getElementById("form");
+console.log(form);
 
 function setHaushaltsbuch(data) {
   console.log(data);
@@ -18,7 +19,7 @@ function setHaushaltsbuch(data) {
       "<label class='form-check-label' for='exampleCheck" +
       i +
       "'>" +
-      data[i].name +
+      data[i].bezeichnung +
       "</label>" +
       "</div>";
   }
@@ -42,6 +43,14 @@ function changeSite() {
       location.href = "/uebersicht";
     }
   }
+}
+
+function haushaltsbuch() {
+  location.href = "/haushaltsbuch";
+}
+
+function addHaushaltsbuch() {
+  location.href = "/neuesHaushaltsbuch";
 }
 
 form.addEventListener("submit", (e) => {

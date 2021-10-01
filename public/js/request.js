@@ -1,15 +1,15 @@
-function getRequest(path, func, data = undefined, info = undefined) {
+function getRequest(path, func, info = undefined) {
   let request = new XMLHttpRequest();
   request.open("GET", path);
   request.onload = function () {
-    try {
-      let data = JSON.parse(request.responseText);
-      console.log(data);
-      console.log("Test");
+    //try {
+    let data = JSON.parse(request.responseText);
+    console.log(data);
+    console.log("Test");
 
-      if (!data.fehler) {
-        func(data.daten);
-      } else {
+    if (!data.fehler) {
+      func(data.daten);
+    } /*else {
         if (info == undefined) {
           location.href = "/fehler";
         } else {
@@ -22,14 +22,10 @@ function getRequest(path, func, data = undefined, info = undefined) {
       } else {
         location.href = "/fehler/" + info;
       }
-    }
+    }*/
   };
 
-  if (data == undefined) {
-    request.send();
-  } else {
-    request.send(data);
-  }
+  request.send();
 }
 
 function postRequest(path, data, func = undefined, info = undefined) {
@@ -39,27 +35,30 @@ function postRequest(path, data, func = undefined, info = undefined) {
   //request.setRequestHeader("Content-Length", data.length);
 
   requestPost.onload = function () {
-    try {
-      let dataPost = JSON.parse(requestPost.responseText);
-
-      if (!dataPost.fehler) {
-        if (func != undefined) {
-          func(dataPost.daten);
-        }
-      } else {
-        if (info == undefined) {
-          location.href = "/fehler";
-        } else {
-          location.href = "/fehler/" + info;
-        }
+    //try {
+    let dataPost = JSON.parse(requestPost.responseText);
+    console.log(dataPost);
+    if (!dataPost.fehler) {
+      console.log("kein fehler");
+      if (func != undefined) {
+        func(dataPost.daten);
       }
-    } catch {
+    } /* else {
       if (info == undefined) {
         location.href = "/fehler";
       } else {
         location.href = "/fehler/" + info;
       }
     }
+    } catch {
+      console.log("Fehler");
+
+      if (info == undefined) {
+        location.href = "/fehler";
+      } else {
+        location.href = "/fehler/" + info;
+      }
+    }*/
   };
 
   requestPost.send(data);
@@ -74,14 +73,14 @@ function putRequest(path, data, func = undefined, info = undefined) {
   //request.setRequestHeader("Content-Length", data.length);
 
   requestPost.onload = function () {
-    try {
-      let dataPost = JSON.parse(requestPost.responseText);
+    //try {
+    let dataPost = JSON.parse(requestPost.responseText);
 
-      if (!dataPost.fehler) {
-        if (func != undefined) {
-          func(dataPost.daten);
-        }
-      } else {
+    if (!dataPost.fehler) {
+      if (func != undefined) {
+        func(dataPost.daten);
+      }
+    } /*else {
         if (info == undefined) {
           location.href = "/fehler";
         } else {
@@ -89,29 +88,30 @@ function putRequest(path, data, func = undefined, info = undefined) {
         }
       }
     } catch {
+      /*
       if (info == undefined) {
         location.href = "/fehler";
       } else {
         location.href = "/fehler/" + info;
       }
-    }
+    }*/
   };
 
   requestPost.send(data);
 }
 
-function deleteRequest(path, func) {
+function deleteRequest(path, func, info = undefined) {
   let request = new XMLHttpRequest();
   request.open("DELETE", path);
   request.onload = function () {
-    try {
-      let data = JSON.parse(request.responseText);
-      console.log(data);
-      console.log("Test");
+    //try {
+    let data = JSON.parse(request.responseText);
+    console.log(data);
+    console.log("Test");
 
-      if (!data.fehler) {
-        func(data.daten);
-      } else {
+    if (!data.fehler) {
+      func(data.daten);
+    } /* else {
         if (info == undefined) {
           location.href = "/fehler";
         } else {
@@ -124,7 +124,7 @@ function deleteRequest(path, func) {
       } else {
         location.href = "/fehler/" + info;
       }
-    }
+    }*/
   };
   request.send();
 }

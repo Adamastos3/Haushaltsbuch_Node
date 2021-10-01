@@ -37,16 +37,13 @@ function addKategorie() {
 
 function delKategorie(id) {
   let path = pathKategorie + id;
-  deleteRequest(path, resetSite);
+  deleteRequest(path, druckFehler);
+  location.reload();
 }
 
 function updateKategorie(id) {
   sessionStorage.setItem("kategorie", id);
   location.href = "/updateKategorie";
-}
-
-function resetSite(data) {
-  location.reload();
 }
 
 getRequest(pathKategorie + "all", setKategorie);

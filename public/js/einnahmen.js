@@ -22,6 +22,9 @@ function setEinnahmen(data) {
       data[i].betrag +
       "</td> " +
       "<td> " +
+      data[i].datum +
+      "</td> " +
+      "<td> " +
       data[i].kategorie.bezeichnung +
       "</td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='delEinnahme(" +
@@ -44,12 +47,13 @@ function auswahlSortierung() {
     sort: document.getElementById("sortierung").value,
     datum: document.getElementById("zeit").value,
   });
-
-  getRequest(pathEinnahmen + "sort", setEinnahmen, data);
+  console.log(data);
+  postRequest(pathEinnahmen + "sort", data, setEinnahmen);
 }
 
 function delEinnahme(id) {
   deleteRequest(pathEinnahmen + id, druckFehler);
+  location.reload();
 }
 
 function updateEinnahme(id) {
@@ -65,12 +69,4 @@ form.addEventListener("submit", (e) => {
   e.preventDefault();
 });
 
-function druckFehler(data) {
-  let text = "";
-  if (data.fehler) {
-    text += data.daten;
-    alert(text);
-  } else {
-    location.reload;
-  }
-}
+auswahlSortierung();

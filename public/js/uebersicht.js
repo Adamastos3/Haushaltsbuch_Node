@@ -1,10 +1,14 @@
-const pathKonto = "http://localhost:3000/uebersicht/konto";
+const pathKonto = "http://localhost:3000/uebersicht/konto/";
 const pathEinnahme = "http://localhost:3000/uebersicht/einnahme";
 const pathAusgabe = "http://localhost:3000/uebersicht/ausgabe";
+const pathKategorie = "http://localhost:3000/uebersicht/Kategorie";
 const idHaushaltsbuch = sessionStorage.getItem("buch");
 let tableKonto = document.getElementById("tableBodyKonto");
 let tableEinnahmen = document.getElementById("tableBodyEinnahme");
 let tableAusgaben = document.getElementById("tableBodyAusgabe");
+let tableKategorie = document.getElementById("tableBodyKategorie");
+let form1 = document.getElementById("form1");
+let form2 = document.getElementById("form2");
 
 function setKonto(data) {
   console.log(data);
@@ -22,7 +26,7 @@ function setKonto(data) {
       data[i].beschreibung +
       "</td> " +
       "<td> " +
-      data[i].betrag.betrag +
+      data[i].kontostand +
       " </td> " +
       "<td> <button type='button' class='btn btn-primary' onclick='ansehenKonto(" +
       data[i].id +
@@ -57,11 +61,8 @@ function setEinnahme(data) {
       data[i].datum +
       " </td> " +
       "<td> " +
-      data[i].Kategorie.bezeichnung +
-      " </td> " +
-      "<td> <button type='button' class='btn btn-primary' onclick='ansehenEinnahmen(" +
-      data[i].id +
-      ")'> Einnahmen ansehen </button> </td> ";
+      data[i].kategorie.bezeichnung +
+      " </td>";
 
     let rw = tableEinnahmen.insertRow(0);
     rw.innerHTML += row;
@@ -72,7 +73,7 @@ function setEinnahme(data) {
 
 function setAusgaben(data) {
   console.log(data);
-
+  console.log("Im format");
   let row = "";
   for (let i = 0; i < data.length; i++) {
     row =
@@ -92,11 +93,8 @@ function setAusgaben(data) {
       data[i].datum +
       " </td> " +
       "<td> " +
-      data[i].Kategorie.bezeichnung +
-      " </td> " +
-      "<td> <button type='button' class='btn btn-primary' onclick='ansehenAusgaben(" +
-      data[i].id +
-      ")'> Ausgaben ansehen </button> </td> ";
+      data[i].kategorie.bezeichnung +
+      " </td> ";
 
     let rw = tableAusgaben.insertRow(0);
     rw.innerHTML += row;
@@ -105,46 +103,106 @@ function setAusgaben(data) {
   }
 }
 
-function ansehenKonto() {
-  location.href = "/konto";
+function setKategorie(data) {
+  console.log(data);
+
+  let row = "";
+  let lengthData = data.length;
+  if (lengthData > 4) {
+    lengthData = 4;
+  }
+  for (let i = 0; i < lengthData; i++) {
+    row =
+      "<th scope='row'> " +
+      (i + 1) +
+      "</th> " +
+      "<td> " +
+      data[i].bezeichnung +
+      "</td> " +
+      "<td> " +
+      data[i].beschreibung +
+      "</td> " +
+      "<td> <button type='button' class='btn btn-primary' onclick='ansehenKategorie(" +
+      data[i].id +
+      ")'> Konto ansehen </button> </td> ";
+
+    let rw = tableKategorie.insertRow(0);
+    rw.innerHTML += row;
+    console.log(rw);
+    row = "";
+  }
 }
-function ansehenEinnahmen() {
-  location.href = "/einnahmen";
+
+function ansehenKonto(id = undefined) {
+  if (id != undefined) {
+    sessionStorage.setItem("konto", id);
+    location.href = "/updateKonto";
+  } else {
+    location.href = "/konto";
+  }
 }
-function ansehenAusgaben() {
-  location.href = "/ausgaben";
+function ansehenEinnahmen(id = undefined) {
+  if (id != undefined) {
+    sessionStorage.setItem("einnahme", id);
+    location.href = "/updateEinnahme";
+  } else {
+    location.href = "/einnahmen";
+  }
+}
+function ansehenAusgaben(id = undefined) {
+  if (id == undefined) {
+    location.href = "/ausgaben";
+  } else {
+    sessionStorage.setItem("ausgabe", id);
+    location.href = "/updateAusgabe";
+  }
+}
+
+function ansehenKategorie(id = undefined) {
+  if (id != undefined) {
+    sessionStorage.setItem("kategorie", id);
+    location.href = "/updateKategorie";
+  } else {
+    location.href = "/kategorie";
+  }
 }
 
 function auswahlUebersichtKonto() {
-  let dataKonto = JSON.stringify({
-    haushaltsid: idHaushaltsbuch,
-    datum: document.getElementById("zeitKonto").value,
-  });
-  getRequest(pathKonto, setKonto, dataKonto);
+  getRequest(pathKonto + idHaushaltsbuch, setKonto);
+}
+
+function auswahlUebersichtKategorie() {
+  getRequest(pathKategorie, setKategorie);
 }
 
 function auswahlUebersichtEinnahmen() {
   let dataEinnahmen = JSON.stringify({
     haushaltsid: idHaushaltsbuch,
-    datum: document.getElementById("zeitEinnahmen").value,
-    sort: document.getElementById("sortierungEinnahme"),
+    datum: document.getElementById("zeitEinnahme").value,
+    sort: document.getElementById("sortierungEinnahme").value,
   });
-  getRequest(pathEinnahme, setEinnahme, dataEinnahmen);
+  console.log("Einnahmen");
+  console.log(dataEinnahmen);
+  postRequest(pathEinnahme, dataEinnahmen, setEinnahme);
 }
 
 function auswahlUebersichtAusgaben() {
   let dataAusgaben = JSON.stringify({
     haushaltsid: idHaushaltsbuch,
-    datum: document.getElementById("zeitAusgaben").value,
-    sort: document.getElementById("sortierungAusgabe"),
+    datum: document.getElementById("zeitAusgabe").value,
+    sort: document.getElementById("sortierungAusgabe").value,
   });
-  getRequest(pathAusgabe, setAusgaben, dataAusgaben);
+  console.log("Ausgaben");
+  console.log(dataAusgaben);
+  postRequest(pathAusgabe, dataAusgaben, setAusgaben);
 }
 
 function start() {
-  auswahlUebersichtKonto;
-  auswahlUebersichtEinnahmen;
-  auswahlUebersichtAusgaben;
+  console.log("starts");
+  auswahlUebersichtKonto();
+  auswahlUebersichtEinnahmen();
+  auswahlUebersichtAusgaben();
+  auswahlUebersichtKategorie();
 }
 
 start();
