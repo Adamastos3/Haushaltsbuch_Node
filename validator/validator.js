@@ -214,6 +214,7 @@ async function checkID(id) {
 }
 
 async function checkText(elem) {
+  console.log(elem);
   let error = [];
   let data =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?. /";
@@ -271,7 +272,7 @@ async function checkAddKonto(req) {
       error.push(er[i]);
     }
   }
-
+  console.log("validator ist fertig");
   return error;
 }
 
@@ -323,6 +324,14 @@ async function checkChangeKategorie(req) {
   return error;
 }
 
+async function checkChangeHaushaltsbuch(req) {
+  return checkChangeKategorie(req);
+}
+
+async function checkAddHaushaltsbuch(req) {
+  return checkAddKategorie(req);
+}
+
 async function checkAddEinnahme(req) {
   let error = [];
   let er = [];
@@ -370,7 +379,8 @@ async function checkAddAusgaben(req) {
 
 async function checkAddKontostand(req) {
   let er = [];
-  er.push(await checkText(req.body.beschreibung));
+  let error = [];
+  er.push(await checkText(req.body.bezeichnung));
   er.push(await checkID(req.body.kontoid));
   er.push(await checkBetrag(req.body.betrag));
 
@@ -386,6 +396,7 @@ async function checkAddKontostand(req) {
 async function checkChangeKontostand(req) {
   let error = [];
   let er = [];
+  //console.log(req.body.bezeichnung);
   er.push(await checkBezeichnung(req.body.bezeichnung));
   er.push(await checkID(req.body.kontoid));
   er.push(await checkBetrag(req.body.betrag));
@@ -416,4 +427,6 @@ module.exports = {
   checkChangeAusgabe,
   checkAddKontostand,
   checkChangeKontostand,
+  checkAddHaushaltsbuch,
+  checkChangeHaushaltsbuch,
 };
