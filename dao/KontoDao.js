@@ -83,7 +83,7 @@ class KontoDao {
 
   create(haushaltsbuchid, bezeichnung = "", beschreibung = "") {
     var sql =
-      "INSERT INTO Haushaltsbuch (Beschreibung, Beschreibung, Haushaltsbuchid) VALUES (?,?,?)";
+      "INSERT INTO Konto (Bezeichnung, Beschreibung, Haushaltsbuchid) VALUES (?,?,?)";
     var statement = this._conn.prepare(sql);
     var params = [bezeichnung, beschreibung, haushaltsbuchid];
     var result = statement.run(params);
@@ -97,7 +97,7 @@ class KontoDao {
 
   update(id, haushaltsbuchid, name = "", beschreibung = "") {
     var sql =
-      "UPDATE Haushaltsbuch SET Name=?,Beschreibung=?, Haushaltsbuchid=? WHERE ID=?";
+      "UPDATE Konto SET Bezeichnung=?,Beschreibung=?, Haushaltsbuchid=? WHERE ID=?";
     var statement = this._conn.prepare(sql);
     var params = [name, beschreibung, haushaltsbuchid, id];
     var result = statement.run(params);
@@ -119,6 +119,28 @@ class KontoDao {
         throw new Error("Could not delete Record by id=" + id);
 
       return true;
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByHaushaltsbuchId(id) {
+    try {
+      let resultKonto = this.loadByHaushaltsbuchId(id);
+      if (resultKonto.length != 0) {
+        var sql = "DELETE FROM Konto WHERE Haushaltsbuchid=?";
+        var statement = this._conn.prepare(sql);
+        var result = statement.run(id);
+
+        if (result.changes < 1)
+          throw new Error("Could not delete Record by id=" + id);
+
+        return true;
+      } else {
+        return false;
+      }
     } catch (ex) {
       throw new Error(
         "Could not delete Record by id=" + id + ". Reason: " + ex.message
