@@ -5,6 +5,7 @@ const Konto = require("./KontoDao");
 class EinnahmenDao {
   constructor(dbConnection) {
     this._conn = dbConnection;
+    this.defaultKategorie = 1;
   }
 
   getConnection() {
@@ -43,7 +44,7 @@ class EinnahmenDao {
 
     result = helper.arrayObjectKeysToLower(result);
 
-    for (let i = 0; i < result.lenght; i++) {
+    for (let i = 0; i < result.length; i++) {
       result[i].datum = helper.formatToGermanDate(
         helper.parseSQLDateTimeString(result[i].datum)
       );
@@ -76,7 +77,7 @@ class EinnahmenDao {
 
     result = helper.arrayObjectKeysToLower(result);
 
-    for (let i = 0; i < result.lenght; i++) {
+    for (let i = 0; i < result.length; i++) {
       result[i].datum = helper.formatToGermanDate(
         helper.parseSQLDateTimeString(result[i].datum)
       );
@@ -99,14 +100,19 @@ class EinnahmenDao {
 
     result = helper.arrayObjectKeysToLower(result);
 
-    for (let i = 0; i < result.lenght; i++) {
-      result[i].datum = helper.formatToGermanDate(
-        helper.parseSQLDateTimeString(result[i].datum)
-      );
-      result[i].kategorie = kategorie.loadById(result[i].kategorieid);
-      result[i].konto = konto.loadById(result[i].kontoid);
-    }
+    console.log("einnahme");
+    console.log(result);
 
+    for (var h = 0; h < result.length; h++) {
+      result[h].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[h].datum)
+      );
+      console.log("Nach datum");
+      console.log(result[h]);
+      result[h].kategorie = kategorie.loadById(result[h].kategorieid);
+      result[h].konto = konto.loadById(result[h].kontoid);
+    }
+    console.log("end dao");
     return result;
   }
 
@@ -126,18 +132,20 @@ class EinnahmenDao {
     bezeichnung = "",
     beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandid
   ) {
     var sql =
-      "INSERT INTO Einnahmen (Bezeichnung, Beschreibung, Betrag, Datum, Kategorieid, Kontoid) VALUES (?,?,?,?,?,?)";
+      "INSERT INTO Einnahmen (Bezeichnung, Beschreibung, Betrag, Datum, Kategorieid, Kontoid, Kontostandid) VALUES (?,?,?,?,?,?,?)";
     var statement = this._conn.prepare(sql);
     var params = [
       bezeichnung,
       beschreibung,
       betrag,
-      datum,
+      helper.formatToSQLDateTime(datum),
       kategorieid,
       kontoid,
+      kontostandid,
     ];
     var result = statement.run(params);
 
@@ -151,22 +159,24 @@ class EinnahmenDao {
   update(
     id,
     kategorieid,
-    kontid,
+    konoid,
     bezeichnung = "",
     beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandid
   ) {
     var sql =
-      "UPDATE Einnahmen SET Bezeichnung=?,Beschreibung=?, Betrag=?, Datum=?, Kategorieid=?, Kontoid=? WHERE ID=?";
+      "UPDATE Einnahmen SET Bezeichnung=?,Beschreibung=?, Betrag=?, Datum=?, Kategorieid=?, Kontoid=?, Kontostandid=? WHERE ID=?";
     var statement = this._conn.prepare(sql);
     var params = [
       bezeichnung,
       beschreibung,
       betrag,
-      datum,
+      helper.formatToSQLDateTime(datum),
       kategorieid,
-      kontid,
+      kontoid,
+      kontostandid,
       id,
     ];
     var result = statement.run(params);
@@ -188,6 +198,55 @@ class EinnahmenDao {
         throw new Error("Could not delete Record by id=" + id);
 
       return true;
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByKontoId(id) {
+    try {
+      let resultEinnahmen = this.loadbyKontoid(id);
+      if (resultEinnahmen.length != 0) {
+        var sql = "DELETE FROM Einnahmen WHERE Kontoid=?";
+        var statement = this._conn.prepare(sql);
+        var result = statement.run(id);
+
+        if (result.changes < 1)
+          throw new Error("Could not delete Record by id=" + id);
+
+        return true;
+      } else {
+        return false;
+      }
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByKategorie(id) {
+    try {
+      let resultEinnahmen = this.loadbyKategorie(id);
+      if (resultEinnahmen.length != 0) {
+        for (let i = 0; i < resultEinnahmen; i++) {
+          this.update(
+            resultEinnahmen[i].id,
+            this.defaultKategorie,
+            resultEinnahmen[i].kontoid,
+            resultEinnahmen[i].bezeichnung,
+            resultEinnahmen[i].beschreibung,
+            resultEinnahmen[i].betrag,
+            helper.formatToSQLDateTime(resultEinnahmen[i].datum)
+          );
+        }
+
+        return true;
+      } else {
+        return false;
+      }
     } catch (ex) {
       throw new Error(
         "Could not delete Record by id=" + id + ". Reason: " + ex.message
