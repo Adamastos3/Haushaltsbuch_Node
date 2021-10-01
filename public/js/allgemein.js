@@ -42,6 +42,7 @@ function setPreis(preis) {
 }
 
 function setDateToGerman(date) {
+  console.log(date);
   let str = date.split("-");
   return "" + str[2] + "." + str[1] + "." + str[0];
 }
@@ -50,6 +51,16 @@ function setDatum(id) {
   let datum = document.getElementById(id);
   datum.value = "";
   datum.setAttribute("type", "date");
+}
+
+function druckFehler(data) {
+  let text = "";
+  if (data.fehler) {
+    text += data.daten;
+    alert(text);
+  } else {
+    location.reload();
+  }
 }
 
 initStorage();
