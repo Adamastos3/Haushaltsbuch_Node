@@ -20,7 +20,7 @@ server.get("/updateAusgabe", (req, res) => {
   });
 });
 
-server.get("/ausgaben/sort", (req, res) => {
+server.post("/ausgaben/sort", (req, res) => {
   ausgaben.getAusgabenBySort(req, res);
 });
 

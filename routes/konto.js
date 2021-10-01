@@ -20,7 +20,7 @@ server.get("/updatekonto", (req, res) => {
 });
 
 server.get("/updatekontostand", (req, res) => {
-  res.sendFile("updateKontostand.html", {
+  res.sendFile("newKontostand.html", {
     root: path.join(__dirname, "..", "view"),
   });
 });
