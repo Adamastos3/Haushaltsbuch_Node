@@ -5,6 +5,7 @@ const Konto = require("./KontoDao");
 class AusgabenDao {
   constructor(dbConnection) {
     this._conn = dbConnection;
+    this.defaultKategorie = 1;
   }
 
   getConnection() {
@@ -76,7 +77,7 @@ class AusgabenDao {
 
     result = helper.arrayObjectKeysToLower(result);
 
-    for (let i = 0; i < result.lenght; i++) {
+    for (let i = 0; i < result.length; i++) {
       result[i].datum = helper.formatToGermanDate(
         helper.parseSQLDateTimeString(result[i].datum)
       );
@@ -99,7 +100,7 @@ class AusgabenDao {
 
     result = helper.arrayObjectKeysToLower(result);
 
-    for (let i = 0; i < result.lenght; i++) {
+    for (let i = 0; i < result.length; i++) {
       result[i].datum = helper.formatToGermanDate(
         helper.parseSQLDateTimeString(result[i].datum)
       );
@@ -126,18 +127,20 @@ class AusgabenDao {
     bezeichnung = "",
     beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandid
   ) {
     var sql =
-      "INSERT INTO Ausgaben (Bezeichnung, Beschreibung, Betrag, Datum, Kategorieid, Kontoid) VALUES (?,?,?,?,?,?)";
+      "INSERT INTO Ausgaben (Bezeichnung, Beschreibung, Betrag, Datum, Kategorieid, Kontoid, Kontostandid) VALUES (?,?,?,?,?,?,?)";
     var statement = this._conn.prepare(sql);
     var params = [
       bezeichnung,
       beschreibung,
       betrag,
-      datum,
+      helper.formatToSQLDateTime(datum),
       kategorieid,
       kontoid,
+      kontostandid,
     ];
     var result = statement.run(params);
 
@@ -155,18 +158,20 @@ class AusgabenDao {
     bezeichnung = "",
     beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandid
   ) {
     var sql =
-      "UPDATE Ausgaben SET Bezeichnung=?,Beschreibung=?, Betrag=?, Datum=?, Kategorieid=?, Kontoid=? WHERE ID=?";
+      "UPDATE Ausgaben SET Bezeichnung=?,Beschreibung=?, Betrag=?, Datum=?, Kategorieid=?, Kontoid=?, Kontostandid=? WHERE ID=?";
     var statement = this._conn.prepare(sql);
     var params = [
       bezeichnung,
       beschreibung,
       betrag,
-      datum,
+      helper.formatToSQLDateTime(datum),
       kategorieid,
       kontoid,
+      kontostandid,
       id,
     ];
     var result = statement.run(params);
@@ -188,6 +193,55 @@ class AusgabenDao {
         throw new Error("Could not delete Record by id=" + id);
 
       return true;
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByKontoId(id) {
+    try {
+      let resultAusgaben = this.loadByKontoid(id);
+      if (resultAusgaben.length != 0) {
+        var sql = "DELETE FROM Ausgaben WHERE Kontoid=?";
+        var statement = this._conn.prepare(sql);
+        var result = statement.run(id);
+
+        if (result.changes < 1)
+          throw new Error("Could not delete Record by id=" + id);
+
+        return true;
+      } else {
+        return false;
+      }
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByKategorie(id) {
+    try {
+      let resultAusgaben = this.loadbyKategorie(id);
+      if (resultAusgaben.length != 0) {
+        for (let i = 0; i < resultAusgaben; i++) {
+          this.update(
+            resultAusgaben[i].id,
+            this.defaultKategorie,
+            resultAusgaben[i].kontoid,
+            resultAusgaben[i].bezeichnung,
+            resultAusgaben[i].beschreibung,
+            resultAusgaben[i].betrag,
+            helper.formatToSQLDateTime(resultAusgaben[i].datum)
+          );
+        }
+
+        return true;
+      } else {
+        return false;
+      }
     } catch (ex) {
       throw new Error(
         "Could not delete Record by id=" + id + ". Reason: " + ex.message
