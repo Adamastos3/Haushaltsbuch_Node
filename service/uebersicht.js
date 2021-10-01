@@ -3,13 +3,15 @@ const KontostandDao = require("../dao/KontostandDao.js");
 const KontoDao = require("../dao/KontoDao.js");
 const EinnahmenDao = require("../dao/EinnahmenDao.js");
 const AusgabenDao = require("../dao/AusgabeDao.js");
+const KategorieDao = require("../dao/KategorieDao");
 const db = require("../db/db.js");
 const allgemein = require("./allgemein");
 
 function getKonto(req, res) {
+  console.log(req.params);
   helper.log(
     "Service Uebersicht: Client requested all records of Konto with he Haushaltsid " +
-      req.body.haushaltsid
+      req.params.id
   );
   let DB = db.getDatabase();
   const kontostand = new KontostandDao(DB);
@@ -17,9 +19,10 @@ function getKonto(req, res) {
 
   try {
     let result = [];
-    let resultKonto = konto.loadByHaushaltsbuchId(req.body.haushaltsid);
+    let resultKonto = konto.loadByHaushaltsbuchId(req.params.id);
+    console.log(resultKonto);
     for (let i = 0; i < resultKonto.length; i++) {
-      resultKonto[i].kontostand = kontostand.getMaxId(resultKonto[i].id);
+      resultKonto[i].kontostand = kontostand.getMaxId(resultKonto[i].id).betrag;
       result.push(resultKonto[i]);
     }
     console.log(result);
@@ -36,7 +39,28 @@ function getKonto(req, res) {
   }
 }
 
-function getEinnahmen(req, res) {
+function getKategorie(req, res) {
+  helper.log("Service Uebersicht: Client requested all records of Kategorie ");
+  let DB = db.getDatabase();
+  const kategorie = new KategorieDao(DB);
+
+  try {
+    let result = kategorie.loadAll();
+    console.log(result);
+    helper.log("Service Uebersicht: Records loaded, count=" + result.length);
+    db.closeDatabase(DB);
+    res.status(200).json(helper.jsonMsgOK(result));
+  } catch (ex) {
+    helper.logError(
+      "Service Uebersicht: Error loading all records. Exception occured: " +
+        ex.message
+    );
+    db.closeDatabase(DB);
+    res.status(400).json(helper.jsonMsgError(ex.message));
+  }
+}
+
+async function getEinnahmen(req, res) {
   helper.log(
     "Service Uebersicht: Client requested all records of Ausgaben ordered by sort " +
       req.body.sort +
@@ -46,24 +70,42 @@ function getEinnahmen(req, res) {
   let DB = db.getDatabase();
   const einnahmen = new EinnahmenDao(DB);
   const konto = new KontoDao(DB);
-  let sort = allgemein.getSortEinAus(req.bodys.sort);
+  let sort = allgemein.getSortEinAus(req.body.sort);
   let datum = allgemein.getDatum(req.body.datum);
+  console.log(datum);
   try {
     let result = [];
     let resultKonto = konto.loadByHaushaltsbuchId(req.body.haushaltsid);
-    let resultEinnahmen = einnahmen.loadbySort(datum[0], datum[1], sort);
+    console.log("resultKonto");
+    console.log(resultKonto);
     for (let i = 0; i < resultKonto.length; i++) {
-      for (let j = 0; j < resultEinnahmen.length; i++) {
-        if (resultKonto[i].id == resultEinnahmen[j].kontoid) {
+      let resultEinnahmen = einnahmen.loadbyKontoid(resultKonto[i].id);
+      for (let j = 0; j < resultEinnahmen.length; j++) {
+        if (resultEinnahmen[j] != []) {
           result.push(resultEinnahmen[j]);
         }
       }
     }
-    result = allgemein.sortData(result, datum[0], datum[1], sort);
-    console.log(result);
-    helper.log("Service Uebersicht: Records loaded, count=" + result.length);
-    db.closeDatabase(DB);
-    res.status(200).json(helper.jsonMsgOK(result));
+
+    resultEnd = await allgemein.sortData(result, datum[0], datum[1], sort);
+    if (resultEnd != []) {
+      console.log(resultEnd);
+      helper.log(
+        "Service Uebersicht: Records loaded, count=" + resultEnd.length
+      );
+      db.closeDatabase(DB);
+      console.log("End uebersicht");
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    } else {
+      console.log("Fehler");
+      console.log(resultEnd);
+      helper.log(
+        "Service Uebersicht: Records loaded, count=" + resultEnd.length
+      );
+      db.closeDatabase(DB);
+      console.log("End uebersicht");
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    }
   } catch (ex) {
     helper.logError(
       "Service Uebersicht: Error loading all records. Exception occured: " +
@@ -74,7 +116,7 @@ function getEinnahmen(req, res) {
   }
 }
 
-function getAusgaben(req, res) {
+async function getAusgaben(req, res) {
   helper.log(
     "Service Uebersicht: Client requested all records of Ausgaben ordered by sort " +
       req.body.sort +
@@ -84,24 +126,37 @@ function getAusgaben(req, res) {
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
   const konto = new KontoDao(DB);
-  let sort = allgemein.getSortEinAus(req.bodys.sort);
+  let sort = allgemein.getSortEinAus(req.body.sort);
   let datum = allgemein.getDatum(req.body.datum);
+
   try {
     let result = [];
     let resultKonto = konto.loadByHaushaltsbuchId(req.body.haushaltsid);
-    let resultAusgaben = ausgaben.loadbySort(datum[0], datum[1], sort);
+    console.log("resultKonto");
+    console.log(resultKonto);
     for (let i = 0; i < resultKonto.length; i++) {
-      for (let j = 0; j < resultAusgaben.length; i++) {
-        if (resultKonto[i].id == resultAusgaben[j].kontoid) {
-          result.push(resultEinnahmen[j]);
+      let resultAusgaben = ausgaben.loadByKontoid(resultKonto[i].id);
+      for (let j = 0; j < resultAusgaben.length; j++) {
+        if (resultAusgaben[j] != []) {
+          result.push(resultAusgaben[j]);
         }
       }
     }
-    result = allgemein.sortData(result, datum[0], datum[1], sort);
-    console.log(result);
-    helper.log("Service Uebersicht: Records loaded, count=" + result.length);
-    db.closeDatabase(DB);
-    res.status(200).json(helper.jsonMsgOK(result));
+    resultEnd = await allgemein.sortData(result, datum[0], datum[1], sort);
+    if (resultEnd.length != []) {
+      console.log(resultEnd);
+      helper.log(
+        "Service Uebersicht: Records loaded, count=" + resultEnd.length
+      );
+      db.closeDatabase(DB);
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    } else {
+      helper.log(
+        "Service Uebersicht: Records loaded, count=" + resultEnd.length
+      );
+      db.closeDatabase(DB);
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    }
   } catch (ex) {
     helper.logError(
       "Service Uebersicht: Error loading all records. Exception occured: " +
@@ -112,4 +167,4 @@ function getAusgaben(req, res) {
   }
 }
 
-module.exports = { getAusgaben, getEinnahmen, getKonto };
+module.exports = { getAusgaben, getEinnahmen, getKonto, getKategorie };

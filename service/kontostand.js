@@ -63,7 +63,7 @@ function getKontostandBySort(req, res) {
   );
   let DB = db.getDatabase();
   const kontostand = new KontostandDao(DB);
-  const konto = new KontoDao(Db);
+  const konto = new KontoDao(DB);
   let id = req.body.id;
   let datum = allgemein.getDatum(req.body.datum);
 
@@ -96,20 +96,22 @@ async function addKontostand(req, res) {
   let DB = db.getDatabase();
   const Kontostand = new KontostandDao(DB);
   var errorMsgs = [];
+  console.log(req.body);
   let a = await validator.checkAddKontostand(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
     if (helper.isUndefined(req.body.betrag)) errorMsgs.push("betrag fehlt");
-    if (helper.isUndefined(request.body.datum)) {
-      request.body.datum = helper.getNow();
-    } else if (!helper.isGermanDateTimeFormat(request.body.datum)) {
+    if (helper.isUndefined(req.body.status)) errorMsgs.push("status fehlt");
+    if (helper.isUndefined(req.body.datum)) {
+      req.body.datum = helper.getNow();
+    } else if (!helper.isGermanDateTimeFormat(req.body.datum)) {
       errorMsgs.push(
         "Erstellungsdatum hat das falsche Format, erlaubt: dd.mm.jjjj"
       );
     } else {
-      request.body.datum = helper.parseGermanDateTimeString(request.body.datum);
+      req.body.datum = helper.parseGermanDateTimeString(req.body.datum);
     }
 
     if (errorMsgs.length > 0) {
@@ -130,7 +132,8 @@ async function addKontostand(req, res) {
         req.body.kontoid,
         req.body.bezeichnung,
         req.body.betrag,
-        req.body.datum
+        req.body.datum,
+        req.body.status
       );
       helper.log("Service Kontostand: Record inserted");
       db.closeDatabase(DB);
@@ -163,7 +166,7 @@ async function updateKontostand(req, res) {
   const Kontostand = new KontostandDao(DB);
   var errorMsgs = [];
   let a = await validator.checkChangeKontostand(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
@@ -171,14 +174,15 @@ async function updateKontostand(req, res) {
       errorMsgs.push("kategorieid fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
     if (helper.isUndefined(req.body.betrag)) errorMsgs.push("betrag fehlt");
-    if (helper.isUndefined(request.body.datum)) {
-      request.body.datum = helper.getNow();
-    } else if (!helper.isGermanDateTimeFormat(request.body.datum)) {
+    if (helper.isUndefined(req.body.status)) errorMsgs.push("status fehlt");
+    if (helper.isUndefined(req.body.datum)) {
+      req.body.datum = helper.getNow();
+    } else if (!helper.isGermanDateTimeFormat(req.body.datum)) {
       errorMsgs.push(
         "datum hat das falsche Format, erlaubt: dd.mm.jjjj hh.mm.ss"
       );
     } else {
-      request.body.datum = helper.parseGermanDateTimeString(request.body.datum);
+      req.body.datum = helper.parseGermanDateTimeString(req.body.datum);
     }
 
     if (errorMsgs.length > 0) {
@@ -201,7 +205,8 @@ async function updateKontostand(req, res) {
         req.body.kontoid,
         req.body.bezeichnung,
         req.body.betrag,
-        req.body.datum
+        req.body.datum,
+        req.body.status
       );
       helper.log("Service Kontostand: Record updated, id=" + req.body.id);
       db.closeDatabase(DB);

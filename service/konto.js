@@ -1,9 +1,11 @@
 const helper = require("../helper.js");
 const KontoDao = require("../dao/KontoDao.js");
-const Kontostand = require("../dao/KontostandDao");
+const Einnahmen = require("../dao/EinnahmenDao");
+const Ausgaben = require("../dao/AusgabeDao");
+const KontostandDao = require("../dao/KontostandDao");
 const db = require("../db/db.js");
 const validator = require("../validator/validator");
-const KontostandDao = require("../dao/KontostandDao");
+const defaultKontostandstatusid = 1; //fest
 
 function getKontoAll(req, res) {
   helper.log("Service Konto: Client requested all records");
@@ -36,7 +38,9 @@ function getKontoById(req, res) {
   const kontostand = new KontostandDao(DB);
   try {
     var result = konto.loadById(req.params.id);
+    console.log("konto fertig");
     result.kontostand = kontostand.getMaxId(result.id);
+    console.log("kontostand");
     helper.log("Service Konto: Record loaded");
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
@@ -84,15 +88,25 @@ async function addKonto(req, res) {
   helper.log("Service Konto: Client requested creation of new record");
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const kontostand = new KontostandDao(DB);
   var errorMsgs = [];
+  console.log(req.body);
   let a = await validator.checkAddKonto(req);
-  if (a == []) {
+  console.log("----");
+  console.log(a);
+  console.log("---");
+  if (a.length == 0) {
+    console.log("Test");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
     if (helper.isUndefined(req.body.haushaltsbuchid))
       errorMsgs.push("Haushaltsbuchid fehlt");
+    if (helper.isUndefined(req.body.beschreibung))
+      errorMsgs.push("beschreibung fehlt");
+    if (helper.isUndefined(req.body.betrag)) req.body.betrag = 0.0;
 
     if (errorMsgs.length > 0) {
+      console.log(errorMsgs);
       helper.log("Service Konto: Creation not possible, data missing");
       res
         .status(400)
@@ -111,8 +125,20 @@ async function addKonto(req, res) {
         req.body.bezeichnung,
         req.body.beschreibung
       );
+
+      console.log("Konto fertig");
+      var resultKontostand = kontostand.create(
+        result.id,
+        "Kontostand " + helper.formatToGermanDate(helper.getNow()),
+        req.body.betrag,
+        "" + helper.getNow(),
+        defaultKontostandstatusid
+      );
+      console.log("end Kontostand");
+      console.log(resultKontostand);
       helper.log("Service Konto: Record inserted");
       db.closeDatabase(DB);
+
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
@@ -123,6 +149,7 @@ async function addKonto(req, res) {
       res.status(400).json(helper.jsonMsgError(ex.message));
     }
   } else {
+    console.log(a);
     helper.log("Service Konto: Creation not possible, data missing");
     res
       .status(400)
@@ -140,9 +167,10 @@ async function updateKonto(req, res) {
   helper.log("Service Konto: Client requested update of existing record");
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const kontostand = new KontostandDao(DB);
   var errorMsgs = [];
   let a = await validator.checkChangeKonto(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
@@ -151,6 +179,9 @@ async function updateKonto(req, res) {
     }
     if (helper.isUndefined(req.body.haushaltsbuchid)) {
       errorMsgs.push("haushaltsbuchid fehlt");
+    }
+    if (helper.isUndefined(req.body.betrag)) {
+      errorMsgs.push("Betrag fehlt");
     }
 
     if (errorMsgs.length > 0) {
@@ -174,6 +205,14 @@ async function updateKonto(req, res) {
         req.body.bezeichnung,
         req.body.beschreibung
       );
+
+      var resultKontostand = kontostand.create(
+        result.id,
+        "Kontostand" + helper.formatToGermanDate(helper.getNow()),
+        req.body.betrag,
+        helper.getNow(),
+        defaultKontostandstatusid
+      );
       helper.log("Service Konto: Record updated, id=" + req.body.id);
       db.closeDatabase(DB);
       res.status(200).json(helper.jsonMsgOK(result));
@@ -186,6 +225,7 @@ async function updateKonto(req, res) {
       res.status(400).json(helper.jsonMsgError(ex.message));
     }
   } else {
+    console.log(a);
     helper.log("Service Konto: Update not possible, data missing");
     res
       .status(400)
@@ -201,13 +241,18 @@ async function updateKonto(req, res) {
 
 function deleteKonto(res, req) {
   helper.log(
-    "Service Konto: Client requested deletion of record, id=" +
-      request.params.id
+    "Service Konto: Client requested deletion of record, id=" + req.params.id
   );
   let DB = db.getDatabase();
   const konto = new KontoDao(DB);
+  const einnahmen = new Einnahmen(DB);
+  const ausgaben = new Ausgaben(DB);
+  const kontostand = new KontostandDao(DB);
   let id = req.params.id;
   try {
+    var resultEinnahmen = einnahmen.deleteByKontoId(id);
+    var resultAusgaben = ausgaben.deleteByKontoId(id);
+    var resultKontostand = kontostand.deleteByKontoid(id);
     var result = konto.delete(id);
     console.log(result);
     helper.log("Service Konto: Records loaded, count=" + result.length);

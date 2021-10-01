@@ -1,5 +1,7 @@
 const helper = require("../helper.js");
 const KategorieDao = require("../dao/KategorieDao.js");
+const EinnahmenDao = require("../dao/EinnahmenDao");
+const AusgabeDao = require("../dao/AusgabeDao");
 const db = require("../db/db.js");
 const validator = require("../validator/validator");
 
@@ -50,7 +52,7 @@ async function addKategorie(req, res) {
   const kategorie = new KategorieDao(DB);
   var errorMsgs = [];
   let a = await validator.checkAddKategorie(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
     if (helper.isUndefined(req.body.beschreibung))
@@ -105,7 +107,7 @@ async function updateKategorie(req, res) {
   const kategorie = new KategorieDao(DB);
   var errorMsgs = [];
   let a = await validator.checkChangeKategorie(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
@@ -161,15 +163,22 @@ async function updateKategorie(req, res) {
 function deleteKategorie(res, req) {
   helper.log(
     "Service Kategorie: Client requested deletion of record, id=" +
-      request.params.id
+      req.params.id
   );
   let DB = db.getDatabase();
   const kategorie = new KategorieDao(DB);
+  const einnahmen = new EinnahmenDao(DB);
+  const ausgaben = new AusgabeDao(DB);
   let id = req.params.id;
   try {
+    if (id == 1) {
+      throw new Error("Kategorie can not ne deleted");
+    }
+    einnahmen.deleteByKategorie(id);
+    ausgaben.deleteByKategorie(id);
     var result = kategorie.delete(id);
     console.log(result);
-    helper.log("Service Kategorie: Records loaded, count=" + result.length);
+    helper.log("Service Kategorie: Records loaded, count=" + result);
     db.closeDatabase(DB);
     res.status(200).json(helper.jsonMsgOK(result));
   } catch (ex) {

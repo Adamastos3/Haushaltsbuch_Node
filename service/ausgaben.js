@@ -1,8 +1,10 @@
 const helper = require("../helper.js");
 const AusgabenDao = require("../dao/AusgabeDao.js");
+const KontostandDao = require("../dao/KontostandDao");
 const db = require("../db/db.js");
 const allgemein = require("./allgemein");
 const validator = require("../validator/validator");
+const KontoDao = require("../dao/KontoDao.js");
 
 function getAusgabenAll(req, res) {
   helper.log("Service Ausgaben: Client requested all records");
@@ -55,7 +57,7 @@ function getAusgabenById(req, res) {
 }
 
 //Sicherung einbauen
-function getAusgabenBySort(req, res) {
+async function getAusgabenBySort(req, res) {
   helper.log(
     "Service Ausgaben: Client requested all records which match the input, sort=" +
       req.body.sort +
@@ -64,6 +66,7 @@ function getAusgabenBySort(req, res) {
   );
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
+  const konto = new KontoDao(DB);
   let id = req.body.id;
   let sort = allgemein.getSortEinAus(req.body.sort);
   let datum = allgemein.getDatum(req.body.datum);
@@ -71,18 +74,26 @@ function getAusgabenBySort(req, res) {
   try {
     let result = [];
     let resultKonto = konto.loadByHaushaltsbuchId(id);
-    for (let i = 0; i < alt.length; i++) {
-      let resultAusgaben = ausgaben.loadbyKontoid(resultKonto[i].id);
+    for (let i = 0; i < resultKonto.length; i++) {
+      let resultAusgaben = ausgaben.loadByKontoid(resultKonto[i].id);
       for (let j = 0; j < resultAusgaben.length; j++) {
         result.push(resultAusgaben[j]);
       }
     }
-    result = allgemein.sortData(result, datum[0], datum[1], sort);
-    console.log(result);
-    helper.log("Service Ausgaben: Records loaded, count=" + result.length);
-    db.closeDatabase(DB);
+    let resultEnd = await allgemein.sortData(result, datum[0], datum[1], sort);
+    if (resultEnd != []) {
+      console.log(resultEnd);
+      helper.log("Service Ausgaben: Records loaded, count=" + resultEnd.length);
+      db.closeDatabase(DB);
 
-    res.status(200).json(helper.jsonMsgOK(result));
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    } else {
+      onsole.log(resultEnd);
+      helper.log("Service Ausgaben: Records loaded, count=" + resultEnd.length);
+      db.closeDatabase(DB);
+
+      res.status(200).json(helper.jsonMsgOK(resultEnd));
+    }
   } catch (ex) {
     helper.logError(
       "Service Ausgaben: Error loading all records. Exception occured: " +
@@ -93,34 +104,13 @@ function getAusgabenBySort(req, res) {
   }
 }
 
-function addKontostand(data) {
-  let DB = db.getDatabase();
-  const kontostand = new KontostandDao(DB);
-
-  let kontoid = data.kontoid;
-  let lastId = kontostand.getMaxId(kontoid);
-  let Kontostand = lastId.betrag - data.betrag;
-  let bezeichnung = "Kontostand " + data.datum;
-  let beschreibung = "Kontostand nach der Ausgabe " + data.id;
-
-  let result = kontostand.create(
-    kontoid,
-    bezeichnung,
-    beschreibung,
-    Kontostand,
-    data.datum
-  );
-
-  console.log(result);
-}
-
 async function addAusgaben(req, res) {
   helper.log("Service Ausgaben: Client requested creation of new record");
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
   var errorMsgs = [];
   let a = await validator.checkAddAusgaben(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
     if (helper.isUndefined(req.body.beschreibung))
@@ -129,14 +119,14 @@ async function addAusgaben(req, res) {
       errorMsgs.push("kategorieid fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
     if (helper.isUndefined(req.body.betrag)) errorMsgs.push("betrag fehlt");
-    if (helper.isUndefined(request.body.datum)) {
-      request.body.datum = helper.getNow();
-    } else if (!helper.isGermanDateTimeFormat(request.body.datum)) {
+    if (helper.isUndefined(req.body.datum)) {
+      req.body.datum = helper.getNow();
+    } else if (!helper.isGermanDateTimeFormat(req.body.datum)) {
       errorMsgs.push(
         "Datum hat das falsche Format, erlaubt: dd.mm.jjjj hh.mm.ss"
       );
     } else {
-      request.body.datum = helper.parseGermanDateTimeString(request.body.datum);
+      req.body.datum = helper.parseGermanDateTimeString(req.body.datum);
     }
 
     if (errorMsgs.length > 0) {
@@ -153,13 +143,21 @@ async function addAusgaben(req, res) {
       return;
     }
     try {
+      var resultKontostand = allgemein.addKontostand(
+        DB,
+        req.body.kontoid,
+        "Kontostand Ausgabe",
+        req.body.betrag,
+        req.body.datum
+      );
       var result = ausgaben.create(
         req.body.kategorieid,
         req.body.kontoid,
         req.body.bezeichnung,
         req.body.beschreibung,
         req.body.betrag,
-        req.body.datum
+        req.body.datum,
+        resultKontostand.id
       );
       helper.log("Service Ausgaben: Record inserted");
       db.closeDatabase(DB);
@@ -193,7 +191,7 @@ async function updateAusgaben(req, res) {
   const ausgaben = new AusgabenDao(DB);
   var errorMsgs = [];
   let a = await validator.checkChangeAusgabe(req);
-  if (a == []) {
+  if (a.length == 0) {
     if (helper.isUndefined(req.body.id)) errorMsgs.push("id fehlt");
     if (helper.isUndefined(req.body.bezeichnung))
       errorMsgs.push("bezeichnung fehlt");
@@ -203,14 +201,14 @@ async function updateAusgaben(req, res) {
       errorMsgs.push("kategorieid fehlt");
     if (helper.isUndefined(req.body.kontoid)) errorMsgs.push("kontoid fehlt");
     if (helper.isUndefined(req.body.betrag)) errorMsgs.push("betrag fehlt");
-    if (helper.isUndefined(request.body.datum)) {
-      request.body.datum = helper.getNow();
-    } else if (!helper.isGermanDateTimeFormat(request.body.datum)) {
+    if (helper.isUndefined(req.body.datum)) {
+      req.body.datum = helper.getNow();
+    } else if (!helper.isGermanDateTimeFormat(req.body.datum)) {
       errorMsgs.push(
         "datum hat das falsche Format, erlaubt: dd.mm.jjjj hh.mm.ss"
       );
     } else {
-      request.body.datum = helper.parseGermanDateTimeString(request.body.datum);
+      req.body.datum = helper.parseGermanDateTimeString(req.body.datum);
     }
 
     if (errorMsgs.length > 0) {
@@ -228,18 +226,21 @@ async function updateAusgaben(req, res) {
     }
 
     try {
+      let resultAusgaben = ausgaben.loadById(req.body.id);
       var result = ausgaben.update(
         req.body.id,
         req.body.kategorieid,
         req.body.kontoid,
         req.body.bezeichnung,
         req.body.beschreibung,
-        req.body.betrag,
-        req.body.datum
+        req.body.betra,
+        resultAusgaben.kontostandid
       );
+      allgemein.updateKontostand(DB, result);
       helper.log("Service Ausgaben: Record updated, id=" + req.body.id);
+      let betrag = resultAusgaben.betra - req.body.betrag;
+      allgemein.updateKontostand(DB, result, betrag);
       db.closeDatabase(DB);
-      addKontostand(result);
       res.status(200).json(helper.jsonMsgOK(result));
     } catch (ex) {
       helper.logError(
@@ -265,8 +266,7 @@ async function updateAusgaben(req, res) {
 
 function deleteAusgaben(res, req) {
   helper.log(
-    "Service Ausgaben: Client requested deletion of record, id=" +
-      request.params.id
+    "Service Ausgaben: Client requested deletion of record, id=" + req.params.id
   );
   let DB = db.getDatabase();
   const ausgaben = new AusgabenDao(DB);
