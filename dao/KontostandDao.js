@@ -1,9 +1,12 @@
 const helper = require("../helper.js");
 const Konto = require("./KontoDao");
+const KontostandStatusDao = require("./KontostandStatusDao");
+const KontostandStatus = require("./KontostandStatusDao");
 
 class KontostandDao {
   constructor(dbConnection) {
     this._conn = dbConnection;
+    this.defaultKontostandstatusid = 1;
   }
 
   getConnection() {
@@ -12,6 +15,7 @@ class KontostandDao {
 
   loadById(id) {
     const konto = new Konto(this._conn);
+    const kontostandstatus = new KontostandStatusDao(this._conn);
 
     var sql = "SELECT * FROM Kontostand WHERE ID=?";
     var statement = this._conn.prepare(sql);
@@ -25,12 +29,17 @@ class KontostandDao {
       helper.parseSQLDateTimeString(result.datum)
     );
     result.konto = konto.loadById(result.kontoid);
+    result.kontostandstatus = kontostandstatus.loadById(
+      result.kontostandstatusid
+    );
 
     return result;
   }
 
   loadAll() {
     const konto = new Konto(this._conn);
+    const kontostandstatus = new KontostandStatusDao(this._conn);
+
     var sql = "SELECT * FROM Kontostand";
     var statement = this._conn.prepare(sql);
     var result = statement.all();
@@ -44,6 +53,59 @@ class KontostandDao {
         helper.parseSQLDateTimeString(result[i].datum)
       );
       result[i].konto = konto.loadById(result[i].kontoid);
+      result[i].kontostandstatus = kontostandstatus.loadById(
+        result[i].kontostandstatusid
+      );
+    }
+
+    return result;
+  }
+
+  loadByKontoid(id) {
+    const konto = new Konto(this._conn);
+    const kontostandstatus = new KontostandStatusDao(this._conn);
+
+    var sql = "SELECT * FROM Kontostand WHERE Kontoid=?";
+    var statement = this._conn.prepare(sql);
+    var result = statement.all(id);
+
+    if (helper.isArrayEmpty(result)) return [];
+
+    result = helper.arrayObjectKeysToLower(result);
+
+    for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
+      result[i].konto = konto.loadById(result[i].kontoid);
+      result[i].kontostandstatus = kontostandstatus.loadById(
+        result[i].kontostandstatusid
+      );
+    }
+
+    return result;
+  }
+
+  loadByKontostandStatusid(id) {
+    const konto = new Konto(this._conn);
+    const kontostandstatus = new KontostandStatusDao(this._conn);
+
+    var sql = "SELECT * FROM Kontostand WHERE Kontostandstatusid=?";
+    var statement = this._conn.prepare(sql);
+    var result = statement.all(id);
+
+    if (helper.isArrayEmpty(result)) return [];
+
+    result = helper.arrayObjectKeysToLower(result);
+
+    for (let i = 0; i < result.lenght; i++) {
+      result[i].datum = helper.formatToGermanDate(
+        helper.parseSQLDateTimeString(result[i].datum)
+      );
+      result[i].konto = konto.loadById(result[i].kontoid);
+      result[i].kontostandstatus = kontostandstatus.loadById(
+        result[i].kontostandstatusid
+      );
     }
 
     return result;
@@ -60,11 +122,12 @@ class KontostandDao {
   }
 
   getMaxId(kontoid) {
-    var sql = "SELECT MAX(ID) FROM Kontostand WHERE Kontoid=?";
+    var sql = "SELECT MAX(ID) AS id FROM Kontostand WHERE Kontoid=?";
     var statement = this._conn.prepare(sql);
-    var id = statement.get(kontoid);
+    var idKonto = statement.get(kontoid);
+    console.log(idKonto.id);
 
-    let result = this.loadById(id.id);
+    let result = this.loadById(idKonto.id);
 
     return result;
   }
@@ -72,14 +135,20 @@ class KontostandDao {
   create(
     kontoid,
     bezeichnung = "",
-    beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandstatusid = this.defaultKontostandstatusid
   ) {
     var sql =
-      "INSERT INTO Kontostand (Bezeichnung, Beschreibung, Betrag, Datum, Kontoid) VALUES (?,?,?,?,?)";
+      "INSERT INTO Kontostand (Bezeichnung, Betrag, Datum, Kontoid, Kontostandstatusid) VALUES (?,?,?,?,?)";
     var statement = this._conn.prepare(sql);
-    var params = [bezeichnung, beschreibung, betrag, datum, kontoid];
+    var params = [
+      bezeichnung,
+      betrag,
+      helper.formatToSQLDateTime(datum),
+      kontoid,
+      kontostandstatusid,
+    ];
     var result = statement.run(params);
 
     if (result.changes != 1)
@@ -91,16 +160,23 @@ class KontostandDao {
 
   update(
     id,
-    kontid,
+    kontoid,
     bezeichnung = "",
-    beschreibung = "",
     betrag = 0.0,
-    datum = helper.getNow()
+    datum = helper.getNow(),
+    kontostandstatusid = this.defaultKontostandstatusid
   ) {
     var sql =
-      "UPDATE Kontostand SET Bezeichnung=?,Beschreibung=?, Betrag=?, Datum=?, Kontoid=? WHERE ID=?";
+      "UPDATE Kontostand SET Bezeichnung=?, Betrag=?, Datum=?, Kontoid=? Kontostandstatusid=? WHERE ID=?";
     var statement = this._conn.prepare(sql);
-    var params = [bezeichnung, beschreibung, betrag, datum, kontid, id];
+    var params = [
+      bezeichnung,
+      betrag,
+      helper.formatToSQLDateTime(datum),
+      kontoid,
+      kontostandstatusid,
+      id,
+    ];
     var result = statement.run(params);
 
     if (result.changes != 1)
@@ -120,6 +196,28 @@ class KontostandDao {
         throw new Error("Could not delete Record by id=" + id);
 
       return true;
+    } catch (ex) {
+      throw new Error(
+        "Could not delete Record by id=" + id + ". Reason: " + ex.message
+      );
+    }
+  }
+
+  deleteByKontoid(id) {
+    try {
+      let resultKontostand = this.loadByKontoid(id);
+      if (resultKontostand.length != 0) {
+        var sql = "DELETE FROM Kontostand WHERE Kontoid=?";
+        var statement = this._conn.prepare(sql);
+        var result = statement.run(id);
+
+        if (result.changes < 1)
+          throw new Error("Could not delete Record by id=" + id);
+
+        return true;
+      } else {
+        return false;
+      }
     } catch (ex) {
       throw new Error(
         "Could not delete Record by id=" + id + ". Reason: " + ex.message
