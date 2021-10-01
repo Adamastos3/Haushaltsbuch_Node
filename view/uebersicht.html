@@ -75,27 +75,30 @@
               <th scope="col">Bezeichnung</th>
               <th scope="col">Beschreibung</th>
               <th scope="col">Betrag</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody id="tableBodyKonto"></tbody>
         </table>
-
-        <div class="container center_div">
-          <p class="h1" id="head">Übersicht Einnahmen</p>
-        </div>
+        <button type="button" class="btn btn-primary" onclick="ansehenKonto()">
+          Kontoübersicht
+        </button>
       </div>
     </div>
     <div class="container center_div">
+      <p class="h1" id="head">Übersicht Einnahmen</p>
+    </div>
+    <div class="container center_div">
       <div class="mb-3" id="checksEinnahmen">
-        <form>
+        <form id="form1">
           <div class="form-row align-items-center">
             <div class="col-auto my-1">
               <label class="mr-sm-2" for="zeit">Auswahl</label>
               <select class="custom-select mr-sm-2" id="zeitEinnahme">
-                <option value="year">Jahr</option>
-                <option value="month">Monat</option>
-                <option value="weak" selected>Woche</option>
-                <option value="day">Tag</option>
+                <option value="Jahr">Jahr</option>
+                <option value="Monat">Monat</option>
+                <option value="Woche" selected>Woche</option>
+                <option value="Tag">Tag</option>
               </select>
               <label class="mr-sm-2" for="sortierung">Sortierung</label>
               <select class="custom-select mr-sm-2" id="sortierungEinnahme">
@@ -105,7 +108,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                onclick="auswahlSortierungEinnahmen()"
+                onclick="auswahlUebersichtEinnahmen()"
               >
                 ausführen
               </button>
@@ -123,10 +126,18 @@
               <th scope="col">Betrag</th>
               <th scope="col">Datum</th>
               <th scope="col">Kategorie</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody id="tableBodyEinnahme"></tbody>
         </table>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="ansehenEinnahmen()"
+        >
+          Eingaben ansehen
+        </button>
       </div>
     </div>
 
@@ -135,15 +146,15 @@
     </div>
     <div class="container center_div">
       <div class="mb-3" id="checksAusgaben">
-        <form>
+        <form id="form2">
           <div class="form-row align-items-center">
             <div class="col-auto my-1">
               <label class="mr-sm-2" for="zeit">Auswahl</label>
-              <select class="custom-select mr-sm-2" id="zeitAusgaben">
-                <option value="year" selected>Jahr</option>
-                <option value="month">Monat</option>
-                <option value="weak">Woche</option>
-                <option value="day">Tag</option>
+              <select class="custom-select mr-sm-2" id="zeitAusgabe">
+                <option value="Jahr">Jahr</option>
+                <option value="Monat">Monat</option>
+                <option value="Woche" selected>Woche</option>
+                <option value="Tag">Tag</option>
               </select>
               <label class="mr-sm-2" for="sortierung">Sortierung</label>
               <select class="custom-select mr-sm-2" id="sortierungAusgabe">
@@ -154,7 +165,7 @@
               <button
                 type="button"
                 class="btn btn-primary"
-                onclick="auswahlSortierungAusgaben()"
+                onclick="auswahlUebersichtAusgaben()"
               >
                 ausführen
               </button>
@@ -170,13 +181,48 @@
               <th scope="col">Bezeichnung</th>
               <th scope="col">Beschreibung</th>
               <th scope="col">Betrag</th>
+              <th scope="col">Datum</th>
               <th scope="col">Kategorie</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody id="tableBodyAusgabe"></tbody>
         </table>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="ansehenAusgaben()"
+        >
+          Ausgaben ansehen
+        </button>
       </div>
     </div>
+    <div class="container center_div">
+      <p class="h1" id="head">Übersicht Kategorien</p>
+    </div>
+    <div class="container center_div">
+      <div class="mb-3" id="checks2Ausgabe">
+        <table class="table" id="kategorientable">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Bezeichnung</th>
+              <th scope="col">Beschreibung</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBodyKategorie"></tbody>
+        </table>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="ansehenKategorie()"
+        >
+          Kategorien ansehen
+        </button>
+      </div>
+    </div>
+
     <footer class="fixed-bottom bg-light text-center text-lg-start">
       <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
         © 2020 Copyright:

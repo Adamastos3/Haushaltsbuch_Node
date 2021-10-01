@@ -22,8 +22,8 @@
     ></script>
     <script src="./js/allgemein.js" defer></script>
     <script src="./js/request.js" defer></script>
-    <script src="./js/newAusgabe.js" defer></script>
-    <title>Ausgabe</title>
+    <script src="./js/newHaushaltsbuch.js" defer></script>
+    <title>Haushaltsbuch</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -46,10 +46,9 @@
               <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/uebersicht">Übersicht</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/ausgaben">Übersicht Ausgaben</a>
+              <a class="nav-link" href="/haushaltsbuch"
+                >Übersicht Haushaltsbuch</a
+              >
             </li>
           </ul>
         </div>
@@ -57,7 +56,7 @@
     </nav>
 
     <div class="container center_div">
-      <p class="h2">Erstellen einer neuen Ausgabe</p>
+      <p class="h1" id="head">Erstellen eines neuen Haushaltsbuchs</p>
     </div>
 
     <div class="container center_div">
@@ -85,21 +84,10 @@
               placeholder="Beschreibung"
             />
           </div>
-          <div class="form-group">
-            <label for="Betrag">Betrag</label>
-            <input type="number" class="form-control" id="Betrag" />
-          </div>
-          <div class="form-group" id="Kategorie"></div>
-          <div class="form-group" id="Konto"></div>
-          <div class="form-group">
-            <label for="Datum">Datum</label>
-            <input type="date" class="form-control" id="Datum" />
-          </div>
-
           <button
             type="submit"
             class="btn btn-primary"
-            onclick="submitAusgabe()"
+            onclick="submitHaushaltsbuch()"
           >
             Submit
           </button>
