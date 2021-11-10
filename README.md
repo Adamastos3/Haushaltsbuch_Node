@@ -15,6 +15,7 @@ This project is intended to be a simple budget book.
 ## Installation
 
 ---
+The program is only partially executable.
 
 A little intro about the installation.
 
@@ -22,6 +23,7 @@ A little intro about the installation.
 $ git clone https://github.com/Adamastos3/Haushalt_Node.git
 $ npm install
 $ npm start
+
 ```
 
 ## Information
